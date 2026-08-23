@@ -31,7 +31,7 @@ The nameserver change at the registrar and any mail re-verification are the owne
 - [x] `www` returns a permanent redirect to the apex
 - [x] The apex is the canonical hostname; preview hostnames still serve `noindex`
 - [ ] A test message sent to the mailbox arrives after cutover
-- [ ] A test message sent from the mailbox is delivered and passes sender authentication after cutover
+- [x] A test message sent from the mailbox is delivered and passes sender authentication after cutover
 - [ ] The provider's email routing feature is confirmed disabled
 - [x] A wizard exists covering the registrar and re-verification steps
 - [x] A rollback note records how to revert nameservers if mail breaks
@@ -71,7 +71,14 @@ What is not done, and why each is left:
   records answer with Cloudflare's addresses rather than their contents, so the
   BIND export, not `dig`, is what establishes a record's type. The export is now
   kept at `docs/dns/export-2026-08-23-cloudflare.txt` for that purpose.
-- **Both mail tests.** No substitute exists for sending a real message and
+- ~~**The outbound mail test.**~~ Done. A message from `hello@10bitlabs.co.uk`
+  to Gmail, 2026-08-23 13:51, delivered in 15 seconds, reporting `SPF: PASS`,
+  `DKIM: PASS with domain 10bitlabs.co.uk` and `DMARC: PASS`. The DKIM pass is
+  the one that mattered: it is the property a proxied signing record would have
+  broken silently, visible to the recipient and to nobody else. `DMARC: PASS` is
+  incidental but welcome — it says the GoDaddy-inherited `p=quarantine` policy is
+  not quietly costing the mailbox anything.
+- **The inbound mail test.** No substitute exists for sending a real message and
   reading the receiving end. Stage 4.
 - **Email routing confirmed disabled.** The verify script proves no Cloudflare
   mail exchanger is published, which is what actually decides delivery — but the

@@ -14,7 +14,7 @@ Second, an architecture decision record for the hosting choice: Cloudflare Worke
 
 **Blocked by:** None — can start immediately. Runs in parallel with any other ticket.
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] Glossary exists at the repo root with the three terms defined
 - [x] Glossary contains no implementation detail, file paths or task lists
