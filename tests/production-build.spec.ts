@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { readdir, readFile, rm } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { expect, test } from '@playwright/test';
+import { sitemapUrls } from './support';
 
 /*
   Every other test in this suite runs against the build the fixtures are admitted
@@ -39,6 +40,9 @@ test.describe('the build the public gets', () => {
       stdio: 'pipe',
       env: { ...process.env, INCLUDE_APP_FIXTURES: '' }
     });
+    // The sitemap is derived from the build, so the public one has to be derived
+    // from this build rather than read off the fixture build wrangler is serving.
+    execFileSync('node', ['scripts/emit-crawler-files.mjs', OUT], { stdio: 'pipe' });
   });
   test.slow();
 
@@ -57,5 +61,20 @@ test.describe('the build the public gets', () => {
       if (!file.endsWith('.html')) continue;
       expect(await readFile(file, 'utf8'), `${file} mentions a fixture`).not.toContain('Fixture');
     }
+  });
+
+  /*
+    The sitemap is the one published file that names routes rather than rendering
+    them, so a fixture could reach a crawler through it without appearing on any
+    page — and a sitemap entry pointing at a route this build did not publish is
+    a 404 reported to Search Console.
+  */
+  test('names only the routes it published in the sitemap', async () => {
+    const sitemap = await readFile(join(OUT, 'sitemap.xml'), 'utf8');
+    const paths = sitemapUrls(sitemap).map((url) => url.pathname);
+
+    expect(paths).toContain('/apps/');
+    expect(paths.filter((path) => path !== '/apps/' && path.startsWith('/apps/'))).toEqual([]);
+    expect(sitemap).not.toContain('fixture');
   });
 });

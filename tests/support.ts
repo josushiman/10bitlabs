@@ -29,3 +29,14 @@ export async function expectLegibleAtEitherEnd(page: Page, route: string) {
     expect(overflow, `${route} spills sideways at ${size.width}px`).toBeLessThanOrEqual(0);
   }
 }
+
+/**
+ * Every URL a sitemap names.
+ *
+ * Two specs read the sitemap — one against the served fixture build, one against
+ * a production build of its own — and they should not each keep their own idea
+ * of what the file looks like.
+ */
+export function sitemapUrls(xml: string): URL[] {
+  return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => new URL(loc));
+}
