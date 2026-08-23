@@ -11,6 +11,14 @@ Four pieces:
 
 Preview hostnames must remain excluded from indexing, so a preview copy is never treated as a duplicate of the real site.
 
+## Design fidelity
+
+The icon mark is at `docs/design/10 Bit Labs Icon.dc.html` and is fully specified there — a 1024×1024 artboard on `oklch(0.15 0.012 25)`, containing two 220×520px bars at `gap:110px`, both `border-radius:56px`, in `oklch(0.68 0.18 25)`: the first filled, the second outlined with a `56px` border. Reproduce those proportions rather than redrawing by eye.
+
+Note the icon hardcodes the Crimson values rather than referencing tokens, so it does not invert with the theme. That is correct — a favicon and a share card have no access to the visitor's palette preference.
+
+The header logo mark built in ticket 02 is the same motif at 28px. If the favicon and the header logo look like different marks, one of them is wrong.
+
 **Blocked by:** 05 — App detail and per-App privacy routes. 06 — The rest of the page set, reachable via the menu.
 
 **Status:** ready-for-agent

@@ -19,11 +19,42 @@ The layers this ticket pierces:
 
 The API token creation and the repository secret are the owner's to perform. Produce a wizard for those steps rather than prose instructions, and do not attempt them.
 
+## Design fidelity
+
+The source design is at `docs/design/10 Bit Labs.dc.html`. It is authoritative for how this looks, and **no test in this project can detect drift from it** — these measurements are the only thing holding it in place. Read `docs/design/README.md` first for the canvas template constructs.
+
+This ticket establishes the type system every later ticket inherits, so getting it wrong here is expensive:
+
+- **Body copy is the system stack**, not Space Grotesk: `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif`. Space Grotesk is headings only. JetBrains Mono is labels, buttons, the terminal, and legal/footer blocks.
+- Root is `min-height:100vh`, flex column, `background:var(--bg)`, `color:var(--text)`. Global resets: `body{margin:0}` and `a{color:inherit;text-decoration:none}`.
+
+Header:
+
+- Sticky, `padding:22px 28px`, `background:color-mix(in srgb, var(--bg) 90%, transparent)`, `backdrop-filter:blur(8px)`, bottom border `1px solid color-mix(in srgb, var(--border) 40%, transparent)`.
+- Logo mark: 28px square, `border-radius:8px`, `var(--bg2)` fill, 1px border, containing two 6×14px bars with `gap:3px` and `border-radius:1.5px` — the first filled with `var(--accent)`, the second outlined `1.5px`. Same motif as the app icon.
+- Wordmark "10 Bit Labs" in JetBrains Mono 600 / 15px / `letter-spacing:0.01em`.
+- Theme toggle: 44×24px pill, `border-radius:999px`, `var(--bg2)` on a 1px border, with an 18px round `var(--accent)` knob at `top:2px` moving `left:2px` (dark) → `left:22px` (light) on `transition:left 0.2s ease`.
+
+Hero:
+
+- Section `max-width:1100px`, `padding:100px 28px 90px`.
+- `// uk software studio` label in JetBrains Mono 13px `var(--textDim)`, `margin-bottom:18px`.
+- Terminal window: 1px `var(--border)`, `border-radius:12px`, `var(--bg2)`. Title bar `padding:12px 16px` with three 10px dots at `gap:8px` in `#ff5f56`, `#ffbd2e`, `#27c93f` — these are hardcoded hex on purpose, imitating macOS, and do not change between palettes — followed by `10bitlabs — zsh` in JetBrains Mono 12px `var(--textDim)`.
+- Terminal body `padding:40px 32px 46px`, opening with `$ whoami` plus a `▌` cursor in JetBrains Mono 14px `var(--accent)`, `margin-bottom:24px`.
+- `h1` in Space Grotesk 600 at `clamp(2.2rem, 5.6vw, 4rem)`, `line-height:1.08`, `letter-spacing:-0.01em`, `max-width:15ch`.
+- Sub-paragraph 18px, `line-height:1.6`, `var(--textDim)`, `max-width:52ch`.
+- Call to action `./explore-apps →`: `padding:14px 26px`, `var(--accent)` on `var(--accentText)`, `border-radius:8px`, JetBrains Mono 600 / 15px, hover `filter:brightness(1.08)`.
+
+Footer: top border `1px solid color-mix(in srgb, var(--border) 40%, transparent)`, inner `max-width:1100px`, `padding:32px 28px`, JetBrains Mono 12px `var(--textDim)`, reading `// © {year} 10 Bit Labs Ltd`.
+
 **Blocked by:** None — can start immediately.
 
 **Status:** ready-for-agent
 
 - [ ] The hero renders and is legible from a small mobile viewport up to desktop
+- [ ] Body copy renders in the system stack; only headings use Space Grotesk and only labels, buttons, the terminal and the footer use JetBrains Mono
+- [ ] The header, logo mark, theme toggle, terminal window, headline and call to action match the measurements recorded above
+- [ ] Only the weights the design uses are subset and served — Space Grotesk 500/600/700, JetBrains Mono 400/500/600
 - [ ] Both typefaces load from the site's own origin
 - [ ] A visitor whose OS is set to light sees the light palette on first paint, with no dark flash
 - [ ] A visitor whose OS is set to dark sees the dark palette by default

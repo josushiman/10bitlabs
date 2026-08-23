@@ -123,6 +123,21 @@ From the owner's perspective, adding a new app — or promoting an app from "in 
 
 ## Implementation Decisions
 
+### Design fidelity
+
+The source design is committed at **`docs/design/`** — the site file, the icon file, the canvas runtime, and a README covering the canvas template constructs and the deliberate deviations. It is reference material; nothing there is compiled or served.
+
+**The design is authoritative for how the site looks.** Where the built site and the design disagree on typography, spacing, colour, component structure or hover behaviour, the design wins unless this spec records an explicit deviation. Those deviations are: real routes instead of the SPA, self-hosted instead of Google-hosted fonts, `prefers-color-scheme` instead of a hard Crimson default, the added in-development card state, the reduced-motion gating, real anchors instead of click handlers, and the two copy corrections below.
+
+This matters more than it looks. The chosen test seam asserts what a visitor receives behaviourally — routes, headers, accessibility, zero third-party requests — and deliberately never asserts on markup. **No test in this suite can detect visual drift from the design.** Fidelity is therefore carried by per-ticket acceptance criteria stating concrete measurements, and by review against `docs/design/`. Anyone tempted to relax those criteria should understand they are the only thing holding the look and feel in place.
+
+### Copy corrections to the design
+
+Two pieces of the design's copy are wrong for the site as specified and are corrected rather than shipped verbatim:
+
+- **The design claims the apps have shipped** — the home section heading reads "A few things we've shipped" and the apps page "Things we've built." All three seed apps are `in-development`. The headings are rewritten to describe what the studio is building. The design's typography, spacing and section structure are unchanged; only the words change.
+- **The design says app privacy policies live elsewhere** — both the About and Privacy pages state each app's policy is "hosted where the app is listed — App Store, Google Play, or its own website." This site generates per-app privacy routes instead, which is one of the reasons it exists at all. That copy is rewritten to match.
+
 ### Framework and output
 
 - The site is built with **Astro**, configured for fully static output. Astro is not built on React or any other UI framework and ships no framework runtime; it compiles to plain HTML, CSS and JS.
@@ -183,6 +198,16 @@ Behaviour, which differs from the design (the design defaults to Crimson always 
 ### Fonts
 
 Space Grotesk and JetBrains Mono are **self-hosted**, not loaded from Google Fonts. Loading them from Google's CDN transmits every visitor's IP address to a third party and directly contradicts the privacy page's claim of no tracking.
+
+**Neither family sets body copy.** This is easy to get wrong and was stated ambiguously in an earlier draft of this spec. The design's roles are:
+
+| Role | Face |
+| --- | --- |
+| Body copy, paragraphs, card descriptions | The system stack — `-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif` |
+| Headings, nav items, app names | Space Grotesk |
+| Labels, buttons, nav `$` prefixes, `//` section labels, the terminal, legal and footer blocks | JetBrains Mono |
+
+Only the weights the design uses are subset: **Space Grotesk 500, 600, 700** and **JetBrains Mono 400, 500, 600**.
 
 Both families are subset to **`latin` plus `latin-ext`**. `latin` alone omits U+0130 (İ) and would risk broken glyphs in the studio's own Turkish product names. Served as `woff2` with `font-display: swap`, with the above-the-fold faces preloaded.
 
@@ -279,6 +304,7 @@ None — this is the repository's first code and first test suite. This spec is 
 - **Changing the registered office address.** Considered and deliberately declined; the residential registered address stays published as designed.
 - **Anything requiring the owner's credentials**: the GoDaddy nameserver change, iCloud+ re-verification, creating the Cloudflare API token, and adding it to GitHub secrets. These are walked through, not performed.
 - **A test for the DNS, mail or CI configuration.** Not reachable from the chosen seam or any other. Covered by a manual verification checklist instead. Inventing a test that appears to cover this would be worse than admitting it does not.
+- **An automated visual fidelity check.** Screenshot baselines were considered and declined: they would need regenerating on every intentional visual change and are environment-sensitive. Fidelity to `docs/design/` is carried by the concrete measurements in each ticket's acceptance criteria and by review against the design, not by a test. This is a known, accepted gap — every other item in this suite can fail loudly, and this one cannot.
 
 ## Further Notes
 
