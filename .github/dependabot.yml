@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # Security patches land as pull requests, which the workflow above then
+  # tests and previews like any other change.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
