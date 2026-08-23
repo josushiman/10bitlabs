@@ -21,6 +21,15 @@ const { title, description } = Astro.props;
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
 
     {/*
+      The SVG is the one browsers should pick; the ICO is only there for the ones
+      that ask for /favicon.ico regardless. Both are generated from the app icon
+      by scripts/render-favicons.mjs.
+    */}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    {/*
       Blocking, and deliberately so: it resolves the palette before first paint,
       which is what stops a light-mode visitor seeing a dark flash on every
       navigation. It is the only inline script on the site, and the CSP admits it
