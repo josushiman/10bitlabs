@@ -81,9 +81,17 @@ preview-host assertion failed, and it was reverted. The trap is recorded in
 `wrangler.jsonc` too, because that is where someone would go to spring it.
 
 `www` is not a Worker route. Bound as one it would *serve* the site, giving the
-site two hostnames that both look canonical. Instead `www` stays a proxied
-record and a zone redirect rule 301s it to the apex — set up in
+site two hostnames that both look canonical. Instead it is a proxied record with
+a zone redirect rule that 301s it to the apex — set up in
 `scripts/cutover-domain.sh`, asserted by `scripts/verify-cutover.sh`.
+
+The record is `AAAA www 100::`, proxied. A redirect rule runs at Cloudflare's
+edge before any origin is contacted, so the address exists only to make the
+hostname proxiable; `100::` is the IPv6 discard prefix, chosen so that a request
+which somehow gets past the rule fails outright rather than reaching something
+half-alive. It must **not** be a CNAME to the apex: the apex is a Worker Custom
+Domain resolving to Cloudflare's own addresses, so that would give `www` an
+origin that is Cloudflare, and it loops instead of redirecting.
 
 The apex is the canonical hostname and is the one hostname that does **not**
 serve `X-Robots-Tag: noindex`; every other hostname, including the `workers.dev`
