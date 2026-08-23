@@ -240,12 +240,14 @@ Astro's `ClientRouter` is enabled, with a cross-fade and one shared-element tran
 
 The zone must be on Cloudflare nameservers for a Worker Custom Domain; there is no CNAME-only route. Registration stays at GoDaddy and only nameservers move.
 
-`hello@10bitlabs.co.uk` is an existing **iCloud+ custom domain mailbox**. That is five DNS records, not one: two Apple MX records, an SPF TXT record, two DKIM CNAME records, and an Apple domain-verification TXT record. Required order:
+`hello@10bitlabs.co.uk` is an existing **iCloud+ custom domain mailbox**. That is five DNS records, not one: two Apple MX records, an SPF TXT record, one DKIM CNAME record, and an Apple domain-verification TXT record. Apple publishes a single DKIM key — `sig1._domainkey`, pointing at `sig1.dkim.<domain>.at.icloudmailadmin.com`. There is no `sig2`; an earlier draft of this section said there were two, and anyone verifying the cutover against that would go looking for a record that does not exist. Required order:
 
 1. Export the complete current record set from GoDaddy.
 2. Create the Cloudflare zone and recreate **all** existing records, mail records included.
 3. Only then change nameservers at GoDaddy.
 4. Verify mail in both directions before considering the cutover done.
+
+The DKIM CNAME must be **DNS only** in Cloudflare, never proxied. Proxied, Cloudflare answers with its own addresses instead of following the CNAME, and the DKIM lookup gets an address where it needs a key — mail still flows and SPF still passes, so nothing looks broken until a recipient checks the signature.
 
 **Cloudflare Email Routing must not be enabled at any point.** It installs its own MX records and would take delivery away from iCloud. An earlier draft of this plan recommended Email Routing on the assumption no mailbox existed; that recommendation is withdrawn and is recorded here so it is not reintroduced.
 
