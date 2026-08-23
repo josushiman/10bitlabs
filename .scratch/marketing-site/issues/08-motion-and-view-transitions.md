@@ -103,3 +103,27 @@ The cross-fade and the shared-element card-to-detail transition have no design p
   Note that `addInitScript` runs in a fresh context per document, so a counter
   written there cannot detect a reload — the spec leaves a marker on `window`
   after `goto` instead.
+
+### Follow-up: the reduced-motion test failed its first CI run
+
+Added while working ticket 09. `tests/motion.spec.ts` landed in `a1dd617`, which
+never got a CI run of its own, so the first machine other than a developer laptop
+to run it was the GitHub runner — and "gets instant cuts between pages rather than
+a cross-fade" failed there, twice, at 124ms and 139ms against a 100ms bound.
+
+Not a flake to be retried and not a regression: the assertion was measuring the
+wrong thing. Elapsed wall-clock time between `startViewTransition` and `finished`
+measures the machine as much as the animation, and a loaded runner takes over
+100ms to swap a document with nothing animating at all. The bound could only ever
+have been a guess about how fast the test machine was.
+
+It now counts the animations the browser put on the transition's pseudo-elements,
+sampled at `ready` — the moment they exist and before any has run. Reduced motion
+sets `animation: none !important` on those pseudo-elements, so the count is zero
+on any machine at any speed, and the count is five when it is working normally.
+Checked both ways: relaxing the rule to `animation-duration: 0.9s` fails the test
+with five animations found.
+
+The opposite assertion — that a visitor who asked for nothing still gets a
+cross-fade — keeps its wall-clock bound alongside the new count, because that
+direction is safe: a slower machine only ever pushes the number up.

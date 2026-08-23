@@ -17,6 +17,7 @@ async function watchTransitions(page: Page) {
   await page.addInitScript(() => {
     const w = window as any;
     w.__transitions = [] as number[];
+    w.__transitionAnimations = [] as number[];
     w.__themeAtSwap = [] as string[];
 
     const start = document.startViewTransition?.bind(document);
@@ -24,6 +25,33 @@ async function watchTransitions(page: Page) {
       document.startViewTransition = ((callback: any) => {
         const began = performance.now();
         const transition = start(callback);
+
+        /*
+          How many animations the browser actually put on the transition's
+          pseudo-elements. `ready` is the moment they exist and before any of
+          them has run, which is the only point at which they can be counted.
+
+          This is what tells a cross-fade from an instant cut. Elapsed time
+          cannot: it measures the machine as much as the animation, and a loaded
+          CI runner takes over 100ms to swap a document with nothing animating
+          at all. A count is the same number on every machine.
+        */
+        transition.ready
+          .then(() =>
+            w.__transitionAnimations.push(
+              document
+                .getAnimations()
+                .filter((animation: any) =>
+                  ((animation.effect?.pseudoElement as string) ?? '').startsWith(
+                    '::view-transition'
+                  )
+                ).length
+            )
+          )
+          // A transition the browser skipped animated nothing, which is a real
+          // answer rather than a failure to get one.
+          .catch(() => w.__transitionAnimations.push(0));
+
         transition.finished.finally(() => w.__transitions.push(performance.now() - began));
         return transition;
       }) as typeof document.startViewTransition;
@@ -52,6 +80,10 @@ const sameDocument = (page: Page) =>
 
 const transitionTimes = (page: Page) =>
   page.evaluate(() => (window as any).__transitions as number[]);
+
+/** How many animations ran on each navigation's view-transition pseudo-elements. */
+const transitionAnimations = (page: Page) =>
+  page.evaluate(() => (window as any).__transitionAnimations as number[]);
 
 /*
   Everything the browser has been told to carry across this navigation.
@@ -311,9 +343,9 @@ test.describe('a visitor who has asked for less motion', () => {
     await page.getByRole('link', { name: 'About', exact: true }).click();
     await expect(page).toHaveURL('/about/');
 
-    await expect.poll(() => transitionTimes(page)).toHaveLength(1);
-    const [elapsed] = await transitionTimes(page);
-    expect(elapsed, 'the page transition still ran an animation').toBeLessThan(100);
+    await expect.poll(() => transitionAnimations(page)).toHaveLength(1);
+    const [animations] = await transitionAnimations(page);
+    expect(animations, 'the page transition still ran an animation').toBe(0);
   });
 
   test('gets cards that do not lift or ease under the pointer', async ({ page }) => {
@@ -335,9 +367,16 @@ test('a visitor who has asked for nothing still gets the cross-fade', async ({ p
   await page.getByRole('link', { name: 'About', exact: true }).click();
   await expect(page).toHaveURL('/about/');
 
+  await expect.poll(() => transitionAnimations(page)).toHaveLength(1);
+  const [animations] = await transitionAnimations(page);
+  expect(animations, 'the page transition was instant for everyone').toBeGreaterThan(0);
+
+  // And it lasted long enough to be seen. Safe as a wall-clock bound in a way
+  // its opposite is not: a slower machine only ever pushes this number up.
+  // Polled separately, because `ready` resolves well before `finished` does.
   await expect.poll(() => transitionTimes(page)).toHaveLength(1);
   const [elapsed] = await transitionTimes(page);
-  expect(elapsed, 'the page transition was instant for everyone').toBeGreaterThan(100);
+  expect(elapsed, 'the page transition was over before it registered').toBeGreaterThan(100);
 });
 
 test('the terminal cursor blinks for everyone who has not asked for less', async ({ page }) => {
