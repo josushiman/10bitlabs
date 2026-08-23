@@ -23,16 +23,16 @@ The nameserver change at the registrar and any mail re-verification are the owne
 
 **Blocked by:** 02 — Walking skeleton: the hero, live on the internet.
 
-**Status:** ready-for-human
+**Status:** done
 
-- [ ] The complete pre-existing record set is exported and stored before anything changes
+- [~] The complete pre-existing record set is exported and stored before anything changes — not satisfiable as written; see Comments
 - [x] All five mail records exist at the new provider before nameservers are switched
 - [x] The apex domain serves the site
 - [x] `www` returns a permanent redirect to the apex
 - [x] The apex is the canonical hostname; preview hostnames still serve `noindex`
-- [ ] A test message sent to the mailbox arrives after cutover
+- [x] A test message sent to the mailbox arrives after cutover
 - [x] A test message sent from the mailbox is delivered and passes sender authentication after cutover
-- [ ] The provider's email routing feature is confirmed disabled
+- [x] The provider's email routing feature is confirmed disabled
 - [x] A wizard exists covering the registrar and re-verification steps
 - [x] A rollback note records how to revert nameservers if mail breaks
 
@@ -78,15 +78,19 @@ What is not done, and why each is left:
   broken silently, visible to the recipient and to nobody else. `DMARC: PASS` is
   incidental but welcome — it says the GoDaddy-inherited `p=quarantine` policy is
   not quietly costing the mailbox anything.
-- **The inbound mail test.** No substitute exists for sending a real message and
-  reading the receiving end. Stage 4.
+- ~~**The inbound mail test.**~~ Confirmed by the owner: a message sent to the
+  mailbox arrives.
+- ~~**Email routing confirmed disabled.**~~ Confirmed by the owner in the
+  dashboard, which is the only place the switch is visible. The verify script
+  independently proves no Cloudflare mail exchanger is published, and will fail
+  if one ever appears.
 - **Email routing confirmed disabled.** The verify script proves no Cloudflare
   mail exchanger is published, which is what actually decides delivery — but the
   feature can be enabled and unconfigured and still leave the Apple records
   standing, and only the dashboard shows that. Inferring the switch from the
   records would be claiming a confirmation the method cannot give, so the
   criterion stays open and the dashboard check is part of stage 4.
-- **The complete export.** `docs/dns/snapshot-2026-08-23.txt` is committed, but
+- **The complete export — the one criterion this ticket cannot satisfy.** `docs/dns/snapshot-2026-08-23.txt` is committed, but
   it is a witness rather than an export: `dig` can only ask about names it
   already knows, and a proxied record answers with Cloudflare's addresses
   instead of its own content. The authoritative BIND file is a download, and it
@@ -133,3 +137,33 @@ its TLS handshake, which is consistent with a certificate still being issued for
 a subdomain first used earlier today. The verify script reports it as a warning
 rather than a failure for that reason. If it is still failing in a day it is
 ticket 02's problem, not this one's.
+
+## Closing note
+
+Closed with nine of ten criteria met and the tenth marked `[~]` rather than
+ticked, because it cannot be met and never will be: "the complete pre-existing
+record set is exported and stored **before anything changes**" needed doing
+before the delegation moved, and the delegation had already moved before this
+ticket was picked up. `docs/dns/export-2026-08-23-cloudflare.txt` is the complete
+record set, but it witnesses the Cloudflare zone rather than the GoDaddy one it
+was copied from, so it is not the thing this criterion asked for.
+
+The practical consequence is small and worth stating so nobody goes looking for
+it later. GoDaddy's retained zone still holds the pre-cutover state — delegating
+away does not delete it — so the rollback in `docs/dns/README.md` works
+regardless, and rollback was the reason the criterion existed. What is genuinely
+lost is the contents of the apex `A`/`AAAA` records that were deleted to make
+room for the Custom Domain, since they were proxied and no snapshot could see
+through that. They pointed at a dead origin and nobody will ever want them back.
+
+The criterion is left visible rather than deleted. A cutover checklist that
+quietly drops the step it failed to take is worse than one that admits it.
+
+What this ticket leaves behind for the rest of the work:
+
+- The site is live at `10bitlabs.co.uk`, `www` 301s to it, and the apex is the
+  canonical, indexable hostname. Every other hostname still serves `noindex`.
+- The mailbox is intact in both directions, with DKIM and DMARC passing.
+- `./scripts/verify-cutover.sh` re-checks all of that in one command. It is worth
+  running after anything that touches DNS, and it is the only guard the site has
+  against a change that breaks mail — no test in the suite can see any of it.
