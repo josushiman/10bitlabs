@@ -27,9 +27,9 @@ The nameserver change at the registrar and any mail re-verification are the owne
 
 - [ ] The complete pre-existing record set is exported and stored before anything changes
 - [x] All five mail records exist at the new provider before nameservers are switched
-- [ ] The apex domain serves the site
-- [ ] `www` returns a permanent redirect to the apex
-- [ ] The apex is the canonical hostname; preview hostnames still serve `noindex`
+- [x] The apex domain serves the site
+- [x] `www` returns a permanent redirect to the apex
+- [x] The apex is the canonical hostname; preview hostnames still serve `noindex`
 - [ ] A test message sent to the mailbox arrives after cutover
 - [ ] A test message sent from the mailbox is delivered and passes sender authentication after cutover
 - [ ] The provider's email routing feature is confirmed disabled
@@ -59,10 +59,18 @@ rather than by eye:
 
 What is not done, and why each is left:
 
-- **The apex serves nothing.** `https://10bitlabs.co.uk/` returns 525 — the
-  proxy has no origin to reach, because the Worker is not bound to the apex yet.
-  Binding it is stage 5 of the wizard.
-- **`www` does not redirect.** Same 525. Stage 6.
+- ~~**The apex serves nothing.**~~ Done. The binding was refused until the old
+  `A`/`AAAA` records at the apex were deleted — Cloudflare will not manage a
+  hostname that already carries records it did not create. The wizard now walks
+  that deletion, and is explicit that it does not touch the mailbox.
+- ~~**`www` does not redirect.**~~ Done, via an `AAAA www 100::` record and a
+  zone redirect rule. It had been a proxied `CNAME` to the apex, which cannot
+  work now the apex is a Worker Custom Domain: that hands `www` an origin which
+  is Cloudflare, and the request loops rather than redirecting. Worth recording
+  that `dig` reported `A` and `AAAA` answers for that name throughout — proxied
+  records answer with Cloudflare's addresses rather than their contents, so the
+  BIND export, not `dig`, is what establishes a record's type. The export is now
+  kept at `docs/dns/export-2026-08-23-cloudflare.txt` for that purpose.
 - **Both mail tests.** No substitute exists for sending a real message and
   reading the receiving end. Stage 4.
 - **Email routing confirmed disabled.** The verify script proves no Cloudflare
