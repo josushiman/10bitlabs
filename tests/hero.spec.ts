@@ -14,7 +14,7 @@ test.describe('the hero', () => {
     await expect(
       page.getByRole('heading', { name: 'We build useful apps for interesting problems.' })
     ).toBeVisible();
-    await expect(page.getByText('10 Bit Labs designs, builds and publishes')).toBeVisible();
+    await expect(page.getByText('10 Bit Labs designs, builds and publishes its own apps')).toBeVisible();
     await expect(page.getByRole('link', { name: './explore-apps →' })).toBeVisible();
     await expect(page.getByText('10bitlabs — zsh')).toBeVisible();
 
@@ -37,7 +37,7 @@ test.describe('the hero', () => {
       locator.first().evaluate((el) => getComputedStyle(el).fontFamily);
 
     // Body copy is the system stack. Neither webfont sets it.
-    const paragraph = await fontOf(page.getByText('10 Bit Labs designs, builds and publishes'));
+    const paragraph = await fontOf(page.getByText('10 Bit Labs designs, builds and publishes its own apps'));
     expect(paragraph).toContain('-apple-system');
     expect(paragraph).not.toContain('Space Grotesk');
     expect(paragraph).not.toContain('JetBrains Mono');

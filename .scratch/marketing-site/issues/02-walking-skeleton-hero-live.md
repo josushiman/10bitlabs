@@ -93,8 +93,11 @@ Notes for whoever picks up the next ticket:
 - `wrangler.jsonc` sets `not_found_handling: "404-page"` in advance of the 404
   page arriving with the page set; until then a missing path returns a plain 404,
   which was checked.
-- The design's own hero copy says "software products and apps". `CONTEXT.md` lists
-  "Product" as a term to avoid for **App**. The design is authoritative for copy
-  the ticket does not correct, so it shipped verbatim — but it is worth a decision
-  either way before the same phrasing spreads to the about and apps pages.
+- The design is visual guidance only, not copy guidance. Its hero sub-paragraph
+  ("software products and apps") used "Product", which `CONTEXT.md` lists as a term
+  to avoid for **App**, so the line was rewritten from the glossary's own Studio
+  definition: "10 Bit Labs designs, builds and publishes its own apps — small,
+  focused tools made to be genuinely useful." The tickets carry no literal hero
+  prose; the glossary is the nearest authority. Later pages should take copy the
+  same way rather than lifting it from the design.
 - The header carries no menu button yet, per this ticket's scope.
