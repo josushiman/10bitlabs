@@ -99,6 +99,15 @@ preview, does. That rule lives in `scripts/emit-headers.mjs`.
 
 ## Snapshots
 
+`export-2026-08-23-cloudflare.txt` is a BIND export of the Cloudflare zone, taken
+the day of the apex binding. It is the record set in its own words rather than
+the proxy's, and it is the file to read when you need to know what a record
+actually *is* — `www` reads as `A`/`AAAA` to `dig` and is really a proxied
+`CNAME`, which is a mistake worth only making once. It is not the pre-cutover
+state: the delegation had already moved when it was taken, so GoDaddy's retained
+zone remains the only witness to what existed before.
+
+
 `scripts/dns-snapshot.sh` records what the zone's own nameservers answer, so
 that "did anything change?" is a diff and not a memory:
 
