@@ -1,0 +1,82 @@
+---
+import SplitSection from './SplitSection.astro';
+
+/*
+  The three steps, numbered — an ordered list, because their order is the point.
+
+  The design's intro describes "a small, product-minded team". The Studio has not
+  said it is a team, and `CONTEXT.md` lists "product" as a term to avoid for an
+  App, so the sentence is rewritten from the glossary's own Studio definition and
+  claims only what is true: one thing at a time, end to end.
+*/
+const STEPS = [
+  { name: 'Idea', body: 'Shaping a small, clear problem worth solving.' },
+  { name: 'Build', body: 'Designing and developing it properly, end to end.' },
+  { name: 'Launch', body: 'Publishing it, and sticking around to maintain it.' }
+];
+---
+
+<SplitSection label="what we do" data-what-we-do>
+  <p class="intro">
+    We take an app from idea through to development and launch, working end to end on
+    one thing at a time.
+  </p>
+
+  <ol class="steps" data-steps>
+    {
+      STEPS.map(({ name, body }, index) => (
+        <li class="step" data-step>
+          {/*
+            The list already carries the order, so the numeral is the design's
+            picture of it rather than something to read out again.
+          */}
+          <div class="number" data-step-number aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+          </div>
+          <h3>{name}</h3>
+          <p>{body}</p>
+        </li>
+      ))
+    }
+  </ol>
+</SplitSection>
+
+<style>
+  .intro {
+    margin: 0 0 32px;
+  }
+
+  .steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .step {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+
+  .number {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .step h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+
+  .step p {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--textDim);
+    margin: 0;
+  }
+</style>

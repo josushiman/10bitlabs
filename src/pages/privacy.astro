@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+---
+
+<BaseLayout
+  title="Privacy — 10 Bit Labs"
+  description="This site uses no analytics or tracking, has no accounts and has no contact form."
+>
+  <section class="page column">
+    <SectionLabel>privacy</SectionLabel>
+    <h1>Privacy.</h1>
+
+    {/*
+      Every claim here is true by construction rather than by policy: the site
+      ships no third-party script, and the tests hold it to zero third-party
+      requests.
+    */}
+    <p>
+      This website does not use analytics or tracking, does not have user accounts, and
+      does not collect personal data through a contact form — there isn't one.
+    </p>
+    <p>If you email us, we use your address only to reply to you.</p>
+    <p>
+      Our apps are separate from this site. Each one has its own privacy policy,
+      published here at the address its store listing points to.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: 680px;
+    padding-block: 100px 120px;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 600;
+    margin: 14px 0 28px;
+  }
+
+  .page p {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    margin: 0 0 20px;
+  }
+</style>

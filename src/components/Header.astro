@@ -1,6 +1,10 @@
 ---
-// Sticky header chrome. The menu button is deliberately absent until there are
-// pages to navigate to; it arrives with the page set.
+import MenuOverlay from './MenuOverlay.astro';
+// Sticky header chrome, and the control that opens the site's navigation.
+//
+// The overlay is rendered as the header's sibling rather than inside it: the
+// header is a stacking context of its own, and an overlay nested in it could
+// never reliably sit above everything else on the page.
 ---
 
 <header class="header">
@@ -22,36 +26,71 @@
     >
       <span class="knob" aria-hidden="true"></span>
     </button>
+
+    <button
+      type="button"
+      class="menu-button"
+      data-menu-button
+      aria-label="Menu"
+      aria-controls="site-menu"
+      aria-expanded="false"
+    >
+      {/* Two bars, not three — the design's own mark, and decoration only. */}
+      <span class="menu-bar" aria-hidden="true"></span>
+      <span class="menu-bar" aria-hidden="true"></span>
+    </button>
   </div>
 </header>
 
+<MenuOverlay />
+
 <script>
-  // The blocking script in <head> has already resolved the theme; this only
-  // handles an explicit change and persists it.
-  const toggle = document.getElementById('theme-toggle');
+  /*
+    The blocking script in <head> has already resolved the theme; this only
+    handles an explicit change and persists it.
+
+    Bound on `astro:page-load` rather than once, because navigation swaps the
+    document rather than reloading it: this script is not re-run, but the button
+    it was listening to has been replaced. Bound immediately as well, so the
+    control still works if the router never arrives — and deduplicated by the
+    element itself, so the two never stack up on the same button.
+  */
   const root = document.documentElement;
+  const bound = new WeakSet<Element>();
 
   const label = (theme: string) =>
     theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
 
-  const sync = () => {
+  const sync = (toggle: HTMLElement) => {
     const theme = root.dataset.theme ?? 'dark';
-    toggle?.setAttribute('title', label(theme));
-    toggle?.setAttribute('aria-pressed', String(theme === 'light'));
+    toggle.setAttribute('title', label(theme));
+    toggle.setAttribute('aria-pressed', String(theme === 'light'));
   };
 
-  toggle?.addEventListener('click', () => {
-    const next = root.dataset.theme === 'light' ? 'dark' : 'light';
-    root.dataset.theme = next;
-    try {
-      localStorage.setItem('theme', next);
-    } catch {
-      // Private browsing or storage disabled: the choice just does not persist.
-    }
-    sync();
-  });
+  const bind = () => {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
 
-  sync();
+    if (!bound.has(toggle)) {
+      bound.add(toggle);
+      toggle.addEventListener('click', () => {
+        root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+        try {
+          localStorage.setItem('theme', root.dataset.theme);
+        } catch {
+          // Private browsing or storage disabled: the choice just does not persist.
+        }
+        sync(toggle);
+      });
+    }
+
+    // Every page is served with the same starting markup, so the control has to
+    // be told again which palette it is actually sitting in.
+    sync(toggle);
+  };
+
+  bind();
+  document.addEventListener('astro:page-load', bind);
 </script>
 
 <style>
@@ -156,6 +195,23 @@
 
   :global(html[data-theme='light']) .knob {
     left: 22px;
+  }
+
+  .menu-button {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  .menu-bar {
+    width: 22px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--text);
   }
 
   @media (prefers-reduced-motion: reduce) {

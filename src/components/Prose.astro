@@ -1,0 +1,67 @@
+---
+/*
+  Long-form markdown, rendered. Both content-driven routes — the App detail page
+  and the App privacy policy — pour a rendered `<Content />` in here, so the
+  measure and rhythm of written copy are decided once rather than per page.
+
+  The styles are `:global` because the markup arrives from the markdown renderer
+  and so carries none of Astro's scoping attributes; the `.prose` wrapper is what
+  keeps them from leaking to the rest of the site.
+*/
+---
+
+<div class="prose"><slot /></div>
+
+<style>
+  .prose {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--textDim);
+  }
+
+  .prose > :global(:first-child) {
+    margin-top: 0;
+  }
+
+  .prose > :global(:last-child) {
+    margin-bottom: 0;
+  }
+
+  .prose :global(p),
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1.2em;
+  }
+
+  .prose :global(li) {
+    margin-bottom: 0.4em;
+  }
+
+  /* Headings stay in the site's heading face and its own colour, not the dim body one. */
+  .prose :global(h2),
+  .prose :global(h3) {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--text);
+    margin: 2em 0 0.6em;
+  }
+
+  .prose :global(h2) {
+    font-size: 1.25rem;
+  }
+
+  .prose :global(h3) {
+    font-size: 1.05rem;
+  }
+
+  .prose :global(a) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .prose :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+  }
+</style>

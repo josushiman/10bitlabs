@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import { COMPANY, MAILTO } from '../lib/company';
+---
+
+<BaseLayout
+  title="About — 10 Bit Labs"
+  description={`${COMPANY.name} is a UK-registered software studio that designs, builds and publishes its own apps.`}
+>
+  <section class="page column">
+    <SectionLabel>about</SectionLabel>
+    <h1>A small studio, not an agency.</h1>
+
+    <p>
+      {COMPANY.name} is a UK-registered software studio. We design, build and publish
+      our own apps, rather than working as contractors for other companies.
+    </p>
+    <p>
+      Our approach is simple: pick a problem worth solving, build something
+      well-considered around it, and keep it maintained after launch. We'd rather ship a
+      handful of apps we're proud of than a long list of half-finished ones.
+    </p>
+    {/*
+      The design sent app policies off to the stores. This site publishes them
+      itself, at the address each store listing points back to — see the App
+      privacy policy routes.
+    */}
+    <p class="last">
+      Each app we release stands on its own, with its own audience and its own privacy
+      policy, published on this site alongside the app it belongs to.
+    </p>
+
+    <div class="card">
+      <div>{COMPANY.name}</div>
+      <div>Company no. {COMPANY.number}</div>
+      <div>{COMPANY.address}</div>
+      <div><a href={MAILTO}>{COMPANY.email}</a></div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: 760px;
+    padding-block: 80px 100px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 600;
+    margin: 14px 0 32px;
+  }
+
+  .page p {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--text);
+    margin: 0 0 22px;
+  }
+
+  .page p.last {
+    margin-bottom: 40px;
+  }
+
+  /* The company details, restated at card scale; the legal page states them in full. */
+  .card {
+    border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+    border-radius: 12px;
+    padding: 24px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.9;
+    color: var(--textDim);
+  }
+
+  .card a:hover {
+    color: var(--accent);
+  }
+</style>

@@ -1,10 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-
-/** How far the page spills past the viewport. Anything above zero means pinching. */
-const sidewaysOverflow = (page: Page) =>
-  page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-  );
+import { expect, test } from '@playwright/test';
+import { cardFor, expectLegibleAtEitherEnd } from './support';
 
 /** The three seed entries, in the order the content files ask for. */
 const SEED = [
@@ -27,9 +22,6 @@ const SEED = [
     description: 'Turkish vocabulary and verb conjugation, practised in short sessions.'
   }
 ];
-
-const cardFor = (page: Page, name: string) =>
-  page.getByRole('listitem').filter({ has: page.getByRole('heading', { name, exact: true }) });
 
 test.describe('the app catalogue', () => {
   test('lists every seed entry with its name, description, platform and initials', async ({
@@ -198,10 +190,16 @@ test.describe('the app catalogue', () => {
     expect(tag.fontFamily).toContain('JetBrains Mono');
     // The label size already on the card, not a new one.
     expect(tag.fontSize).toBe(platform);
-    // The badge tile's exact treatment, not a second accent wash.
-    expect(tag.color).toBe(badge.color);
+    // The badge tile's wash and edge, not a second accent wash of its own.
     expect(tag.background).toBe(badge.background);
     expect(tag.border).toBe(badge.border);
+    /*
+      Where the tag parts company with the badge: the badge's initials are
+      decoration and keep the accent, while the tag is text a visitor has to read
+      and takes the readable colour. Accent on the accent's own wash measures
+      3.9:1 in Paper — see tests/contrast.spec.ts, which is what holds this.
+    */
+    expect(tag.color).not.toBe(badge.color);
   });
 
   test('marks the Turkish name as Turkish and renders its dotless i from the site font', async ({
@@ -225,14 +223,6 @@ test.describe('the app catalogue', () => {
   });
 
   test('is legible on a small phone and on a desktop', async ({ page }) => {
-    for (const size of [
-      { width: 320, height: 640 },
-      { width: 1440, height: 900 }
-    ]) {
-      await page.setViewportSize(size);
-      await page.goto('/apps');
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
-    }
+    await expectLegibleAtEitherEnd(page, '/apps');
   });
 });

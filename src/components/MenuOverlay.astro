@@ -1,0 +1,241 @@
+---
+/*
+  The full-screen navigation, and the only way into most of the site.
+
+  The source design builds each item from a click handler over a placeholder
+  `href="#"`. Here they are real anchors: that is what makes them announce as
+  links, what makes the back button and middle-click work, and what makes every
+  destination something a visitor can bookmark or send to someone else.
+
+  The button that opens this lives in the header, so that the two sit in the
+  header row together; it is found by `data-menu-button` rather than passed in.
+*/
+import { COMPANY, MAILTO } from '../lib/company';
+
+const NAV = [
+  { label: 'Home', href: '/' },
+  { label: 'Apps', href: '/apps/' },
+  { label: 'About', href: '/about/' },
+  { label: 'Contact', href: '/contact/' }
+];
+
+/*
+  Every href here carries its trailing slash, because that is the URL the site
+  actually serves: ask for `/about` and the assets layer answers with a 307 to
+  `/about/`, which is also the address the canonical link tag names. Linking to
+  the canonical form directly is one less round trip on every navigation, and one
+  address rather than two for anything that links in from outside.
+*/
+const here = Astro.url.pathname;
+---
+
+<div class="overlay" id="site-menu" data-menu hidden>
+  <div class="bar">
+    <button type="button" class="close" data-menu-close aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <nav class="nav" aria-label="Site">
+    <ul>
+      {
+        NAV.map(({ label, href }) => (
+          <li>
+            <a
+              href={href}
+              class:list={{ current: href === here }}
+              aria-current={href === here ? 'page' : undefined}
+            >
+              <span class="prompt" aria-hidden="true">
+                $
+              </span>
+              <span class="label">{label}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <div class="foot">
+    <a href={MAILTO}><span aria-hidden="true">$ mail </span>{COMPANY.email}</a>
+  </div>
+</div>
+
+<script>
+  /*
+    Everything here exists so the menu is usable without a mouse. An overlay that
+    covers the page but leaves the page tabbable is worse than no overlay: a
+    keyboard visitor walks into content they cannot see.
+
+    Every element is looked up when it is needed rather than held on to, because
+    navigation swaps the document rather than reloading it: this script is not
+    re-run, and anything captured on the first page would be pointing at an
+    element that has since been thrown away.
+  */
+  const bound = new WeakSet<Element>();
+
+  const overlay = () => document.querySelector<HTMLElement>('[data-menu]');
+  const opener = () => document.querySelector<HTMLButtonElement>('[data-menu-button]');
+
+  // Focus goes to the close button when the menu opens, and back to the button
+  // that opened it when it shuts: that is where the visitor was, and it is still
+  // on screen once the overlay has gone.
+  const setOpen = (open: boolean) => {
+    const menu = overlay();
+    const button = opener();
+    if (!menu || !button) return;
+
+    menu.hidden = !open;
+    button.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('menu-open', open);
+    (open ? menu.querySelector<HTMLElement>('[data-menu-close]') : button)?.focus();
+  };
+
+  const bind = () => {
+    const menu = overlay();
+    const button = opener();
+    const close = menu?.querySelector<HTMLButtonElement>('[data-menu-close]');
+    if (!menu || !button || !close || bound.has(button)) return;
+
+    bound.add(button);
+    button.addEventListener('click', () => setOpen(menu.hidden));
+    close.addEventListener('click', () => setOpen(false));
+  };
+
+  bind();
+  document.addEventListener('astro:page-load', bind);
+
+  /*
+    Bound to the document rather than to the overlay, because focus is not
+    always inside the overlay: clicking its background — the padding around the
+    list, say — moves focus to <body>, and a listener on the overlay would then
+    never hear the keys at all. Tab would walk into the page behind the blur and
+    Escape would do nothing.
+
+    Bound once, and to the document, it is also the one listener here that a
+    document swap leaves alone.
+  */
+  document.addEventListener('keydown', (event) => {
+    const menu = overlay();
+    if (!menu || menu.hidden) return;
+
+    if (event.key === 'Escape') {
+      setOpen(false);
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const items = [...menu.querySelectorAll<HTMLElement>('a[href], button')];
+    if (items.length === 0) return;
+
+    const first = items[0];
+    const last = items[items.length - 1];
+    const inside = menu.contains(document.activeElement);
+    const edge = event.shiftKey ? first : last;
+
+    // Tabbing off either end wraps back in; tabbing from outside comes back in
+    // at whichever end the visitor was heading for.
+    if (inside && document.activeElement !== edge) return;
+
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  });
+</script>
+
+<style>
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: color-mix(in srgb, var(--bg) 98%, transparent);
+    backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* `hidden` has to win over the `display:flex` above, which it otherwise would not. */
+  .overlay[hidden] {
+    display: none;
+  }
+
+  /* The page behind must not scroll under the overlay. */
+  :global(body.menu-open) {
+    overflow: hidden;
+  }
+
+  .bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 20px 26px;
+  }
+
+  .close {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 30px;
+    line-height: 1;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    padding: 0 4px;
+  }
+
+  .nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 40px 80px;
+    overflow-y: auto;
+  }
+
+  .nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav a {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
+  }
+
+  .nav a:hover {
+    opacity: 0.65;
+  }
+
+  .prompt {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    color: var(--accent);
+  }
+
+  .label {
+    font-family: var(--font-heading);
+    font-size: clamp(28px, 6vw, 44px);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .current .label {
+    color: var(--accent);
+  }
+
+  .foot {
+    padding: 24px 40px 40px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--textDim);
+  }
+
+  .foot a:hover {
+    color: var(--text);
+  }
+</style>

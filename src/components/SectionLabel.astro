@@ -1,0 +1,55 @@
+---
+/*
+  The `// something` label that opens every section on the site.
+
+  The slashes are the design's comment motif and carry no meaning, so they are
+  hidden from assistive technology rather than read out as punctuation before
+  every heading. That decision lives here, once, instead of in each page that
+  writes a label.
+
+  Both variations the design asks for are props rather than a class a caller
+  styles from the outside: Astro scopes a parent's styles to the parent's own
+  elements, so a rule written against a class passed in here never matches the
+  element it was aimed at.
+*/
+interface Props {
+  /** The design's dim variant. The hero's label, and nothing else so far. */
+  dim?: boolean;
+  /*
+    Space below the label, in pixels. A union of the three values the design
+    uses rather than a free number: the site's policy forbids inline styles, so
+    each one has to be a rule written here.
+  */
+  spaceBelow?: 10 | 14 | 18;
+}
+
+const { dim = false, spaceBelow } = Astro.props;
+---
+
+<div class:list={['section-label', { dim }, spaceBelow && `space-${spaceBelow}`]} data-section-label>
+  <span aria-hidden="true">// </span><slot />
+</div>
+
+<style>
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  .dim {
+    color: var(--textDim);
+  }
+
+  .space-10 {
+    margin-bottom: 10px;
+  }
+
+  .space-14 {
+    margin-bottom: 14px;
+  }
+
+  .space-18 {
+    margin-bottom: 18px;
+  }
+</style>

@@ -1,0 +1,66 @@
+---
+import AppCard from './AppCard.astro';
+import type { App } from '../lib/apps';
+
+/*
+  The grid of App cards. The catalogue and the home page's featured section both
+  render this, from the same `listApps()` list, so adding an App reaches both
+  without a second edit and neither can drift from the other.
+
+  The design gives the two grids different track floors — 280px in the catalogue,
+  260px on the home page — and nothing else, so that difference is the only prop.
+*/
+interface Props {
+  apps: App[];
+  /** The design's `minmax()` floor for this grid, in pixels. */
+  minTrack?: 260 | 280;
+  /** The level the card names take, one below whatever heading opens the section. */
+  headingLevel?: 2 | 3;
+}
+
+const { apps, minTrack = 280, headingLevel = 2 } = Astro.props;
+---
+
+<ul class:list={['grid', minTrack === 260 && 'min-260']} data-app-grid>
+  {
+    apps.map((app) => (
+      <li>
+        <AppCard app={app} headingLevel={headingLevel} />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  /*
+    The design's `minmax(<floor>, 1fr)`, floored at the available width: a 280px
+    track does not fit inside a 320px viewport once the 28px gutters are taken,
+    and would push the whole page sideways. `min()` leaves the desktop layout
+    exactly as designed and only bites on the narrowest phones.
+
+    Both floors are written out rather than carried in a custom property: a
+    `var()` inside the track function makes Chrome count `auto-fit` as a single
+    repetition, which collapses the grid to one column at every width.
+  */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .min-260 {
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  }
+
+  .grid > li {
+    display: flex;
+    min-width: 0;
+  }
+
+  .grid > li > :global(*) {
+    width: 100%;
+  }
+</style>

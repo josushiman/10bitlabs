@@ -1,0 +1,90 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SectionLabel from '../../../components/SectionLabel.astro';
+import Prose from '../../../components/Prose.astro';
+import { listApps, listPrivacyPolicies, type App, type AppPrivacy } from '../../../lib/apps';
+
+/*
+  One path per written policy, and none for an App without one. This is the URL
+  that goes into an app store listing, so it has to be plain, public and stable —
+  and it must never resolve to an empty page.
+*/
+export async function getStaticPaths() {
+  const [apps, policies] = await Promise.all([listApps(), listPrivacyPolicies()]);
+  return apps
+    .map((app) => ({ app, privacy: policies.get(app.id) }))
+    .filter((pair): pair is { app: App; privacy: AppPrivacy } => pair.privacy !== undefined)
+    .map(({ app, privacy }) => ({ params: { slug: app.id }, props: { app, privacy } }));
+}
+
+interface Props {
+  app: App;
+  privacy: AppPrivacy;
+}
+
+const { app, privacy } = Astro.props;
+const { Content } = await render(privacy);
+
+const updated = privacy.data.updated;
+/*
+  Formatted in UTC, not the builder's zone. `2026-08-23` parses to UTC midnight,
+  so a machine anywhere west of UTC would otherwise print the day before — and
+  disagree with the `datetime` attribute beside it.
+*/
+const updatedLabel = updated?.toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC'
+});
+---
+
+<BaseLayout
+  title={`${app.data.name} privacy policy — 10 Bit Labs`}
+  description={`How ${app.data.name} handles your data.`}
+>
+  <article class="page column">
+    <SectionLabel spaceBelow={14}>privacy</SectionLabel>
+    <h1 class:list={{ undated: !updated }}>
+      <span lang={app.data.lang}>{app.data.name}</span> privacy policy
+    </h1>
+    {
+      updated && (
+        <p class="updated">
+          Last updated <time datetime={updated.toISOString().slice(0, 10)}>{updatedLabel}</time>
+        </p>
+      )
+    }
+
+    <Prose>
+      <Content />
+    </Prose>
+  </article>
+</BaseLayout>
+
+<style>
+  /* The width and rhythm ticket 06's privacy and legal pages are cut to. */
+  .page {
+    max-width: 680px;
+    padding-block: 100px 120px;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+
+  .updated {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--textDim);
+    margin: 0 0 32px;
+  }
+
+  /* An undated policy still needs the gap the date line would have left. */
+  h1.undated {
+    margin-bottom: 32px;
+  }
+</style>

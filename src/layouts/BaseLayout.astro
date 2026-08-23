@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import PageTransitions from '../components/PageTransitions.astro';
 
 interface Props {
   title: string;
@@ -9,6 +10,16 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
+
+/*
+  Absolute URLs, because a card reader has no page to resolve a relative one
+  against. `Astro.site` is the canonical apex, so a preview copy advertises the
+  real site's URL and image — which is what we want: the preview is not a site of
+  its own, and its noindex header keeps it out of the index either way.
+*/
+const canonical = new URL(Astro.url.pathname, Astro.site);
+/* Generated during the build from the icon mark and the palette — see scripts/render-og.mjs. */
+const cardImage = new URL('/og.png', Astro.site);
 ---
 
 <!doctype html>
@@ -18,7 +29,26 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="canonical" href={canonical} />
+
+    {/*
+      What a link to this site renders as when it is shared. Open Graph is read
+      by Slack, iMessage, WhatsApp and everything else that draws a preview;
+      Twitter's card type is the one tag that has no Open Graph equivalent, and
+      without it the image is shown as a thumbnail rather than as a banner.
+    */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="10 Bit Labs" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:image" content={cardImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The 10 Bit Labs mark: a one and a zero." />
+    <meta name="twitter:card" content="summary_large_image" />
 
     {/*
       The SVG is the one browsers should pick; the ICO is only there for the ones
@@ -50,6 +80,8 @@ const { title, description } = Astro.props;
         document.documentElement.dataset.theme = theme;
       })();
     </script>
+
+    <PageTransitions />
 
     <link
       rel="preload"

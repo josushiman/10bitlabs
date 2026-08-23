@@ -42,20 +42,107 @@ There is **no 404 page in the design**, so it is being invented. Build it from t
 
 **Blocked by:** 02 — Walking skeleton: the hero, live on the internet.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] About, contact, privacy and legal each respond at their own URL with a distinct title and description
-- [ ] Each page matches the width, padding and type scale recorded above
-- [ ] The menu overlay matches the design, including the two-bar menu button and the `$`-prefixed items
-- [ ] Neither the About nor the Privacy page says app privacy policies are hosted elsewhere
-- [ ] An unknown path renders the site's own 404 page with a route back, built from the site's existing visual vocabulary
-- [ ] The legal page carries company name, company number, place of registration and registered address
-- [ ] The contact page offers a working email link and no form
-- [ ] Every navigation item is a real link and works with the browser's back button
-- [ ] The menu opens and closes by keyboard alone
-- [ ] The menu button reports its open or closed state to assistive technology
-- [ ] Focus is trapped within the open menu
-- [ ] Escape closes the menu and returns focus sensibly
-- [ ] Decorative section labels are not announced by screen readers
-- [ ] Contrast requirements are met in both palettes
-- [ ] Every page still makes zero third-party network requests
+- [x] About, contact, privacy and legal each respond at their own URL with a distinct title and description
+- [x] Each page matches the width, padding and type scale recorded above
+- [x] The menu overlay matches the design, including the two-bar menu button and the `$`-prefixed items
+- [x] Neither the About nor the Privacy page says app privacy policies are hosted elsewhere
+- [x] An unknown path renders the site's own 404 page with a route back, built from the site's existing visual vocabulary
+- [x] The legal page carries company name, company number, place of registration and registered address
+- [x] The contact page offers a working email link and no form
+- [x] Every navigation item is a real link and works with the browser's back button
+- [x] The menu opens and closes by keyboard alone
+- [x] The menu button reports its open or closed state to assistive technology
+- [x] Focus is trapped within the open menu
+- [x] Escape closes the menu and returns focus sensibly
+- [x] Decorative section labels are not announced by screen readers
+- [x] Contrast requirements are met in both palettes
+- [x] Every page still makes zero third-party network requests
+
+## Comments
+
+### Decisions made while implementing
+
+- **Every internal link now carries its trailing slash.** The assets layer answers
+  `/about` with a 307 to `/about/`, which is also the address `<link rel=canonical>`
+  names, so a slashless href cost a round trip and handed out a second address for
+  a page that already had a canonical one. This was true site-wide before this
+  ticket — the hero CTA, the app cards, the detail page's back link and the App
+  privacy policy URL that goes into a store listing all had it. All of them are
+  fixed, and `tests/navigation.spec.ts` walks every internal href with
+  `maxRedirects: 0` so a slashless link cannot come back.
+
+- **The in-development tag's label is `var(--text)`, not `var(--accent)`.** Ticket
+  04 built the tag as "the badge tile's exact accent treatment"; measured, accent
+  type on the accent's own 14% wash is 3.9:1 in Paper, under 4.5:1. Reducing the
+  wash does not rescue it — even at 6% the Crimson palette only just clears — so
+  the label takes the readable colour and the wash and edge keep carrying the
+  accent. The badge tile's initials keep the accent type because they are
+  `aria-hidden` decoration; the tag is text a visitor has to read.
+
+- **`.column` in `global.css`.** Ticket 05 left a note that the shared page column
+  was "written five times, not three"; this ticket would have made it nine. The
+  centring and the 28px gutter — the parts that must agree page to page — are now
+  written once; each page still declares its own max-width and vertical rhythm,
+  because the design genuinely records different ones.
+
+- **`SectionLabel.astro`.** The `// something` label opened five sections by hand,
+  each repeating the decision to hide the slashes from assistive technology. It is
+  one component now, and `tests/pages.spec.ts` asserts the announced text of the
+  label carries no `/` at all.
+
+### From the code review
+
+Two axes, Standards and Spec, run against the finished change.
+
+- **The focus trap had a hole, and it was the important finding.** The keydown
+  listener was bound to the overlay, so it only heard anything while focus was
+  inside the overlay. Click the overlay's own chrome rather than a control and
+  focus lands on `<body>`; from there Tab walked into the page behind the blur and
+  Escape did nothing. It is bound to the document now, guarded on `menu.hidden`,
+  and tabbing from outside the menu comes back in at whichever end the visitor was
+  heading for. `tests/navigation.spec.ts` covers it, and the test was confirmed to
+  fail against the old binding before the fix landed.
+
+- **`tests/contrast.spec.ts` was exempting visible text.** It skipped anything
+  inside `[aria-hidden="true"]`, which quietly excused the `$` prompts and the
+  `$ mail ` prefixes — visible type that a sighted visitor has to read. It now
+  measures every visible run of text regardless, with one named exemption: the App
+  card's monogram tile, which WCAG exempts as a logotype and which says nothing
+  the App's name beside it does not. Everything still passes.
+
+- **The fidelity checkboxes were ticked on assertion, not evidence.**
+  `tests/design-fidelity.spec.ts` is new and holds the ticket's recorded numbers
+  as numbers: each page's max-width, padding and resolved type scale, and the
+  overlay's blur, wash, row padding, `$` prompt, 44px label, 16px gap, nav padding,
+  mailbox foot and two-bar button.
+
+- **"Product" had drifted into visitor-facing copy.** `CONTEXT.md` rules it out as
+  a synonym for **App**; the About and Privacy pages both used it. Rewritten.
+
+- **The registered particulars were written out in four places.** They are
+  `src/lib/company.ts` now — facts about the company rather than copy, so a change
+  of registered address is one edit.
+
+Two findings were declined. The 404 and Contact pages share a near-identical
+centred-column style block, which is real duplication, but the two pages take
+their measurements from the design independently and should be free to diverge —
+extracting them would couple an invented page to a designed one. And
+`SectionLabel`'s `--label-colour` hook was called speculative; it has a caller
+(the hero's dim label), which is the whole reason it exists.
+
+### Notes for whoever picks up the next ticket
+
+- `tests/contrast.spec.ts` measures every visible run of text on every route in
+  both palettes, reading colours back through a canvas rather than trusting the
+  token values — `color-mix` and `oklch` mean the stylesheet does not know what
+  the screen gets. Ticket 07's featured section and 08's motion work will be held
+  to it automatically; a new route only needs adding to its `ROUTES`.
+- The menu is JavaScript-driven, as the design has it. A visitor with JavaScript
+  off cannot open it, which is why Privacy and Company details are reached from
+  the footer's own `<nav>` rather than only from the overlay.
+- `MenuOverlay.astro` finds the button that opens it by `data-menu-button`, which
+  lives in `Header.astro`. The overlay is rendered as the header's sibling on
+  purpose: the header is a sticky, z-indexed stacking context, and an overlay
+  nested inside it could never reliably sit above the page.

@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/emit-headers.mjs",
+    "build": "astro build && node scripts/emit-crawler-files.mjs && node scripts/render-og.mjs && node scripts/emit-headers.mjs",
     "check": "astro check",
     "serve": "wrangler dev",
     "test": "playwright test"

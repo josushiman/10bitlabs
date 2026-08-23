@@ -1,9 +1,10 @@
 ---
+import SectionLabel from './SectionLabel.astro';
 // The home page hero: the terminal window, the headline and the sub-paragraph.
 ---
 
 <section class="hero">
-  <div class="label"><span aria-hidden="true">// </span>uk software studio</div>
+  <SectionLabel dim spaceBelow={18}>uk software studio</SectionLabel>
 
   <div class="terminal">
     <div class="titlebar">
@@ -23,7 +24,7 @@
         made to be genuinely useful.
       </p>
 
-      <a class="cta" href="/apps">./explore-apps →</a>
+      <a class="cta" href="/apps/">./explore-apps →</a>
     </div>
   </div>
 </section>
@@ -33,13 +34,6 @@
     max-width: 1100px;
     margin: 0 auto;
     padding: 100px 28px 90px;
-  }
-
-  .label {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--textDim);
-    margin-bottom: 18px;
   }
 
   .terminal {
@@ -96,27 +90,6 @@
     font-size: 14px;
     color: var(--accent);
     margin-bottom: 24px;
-  }
-
-  /*
-    An unbounded blink is a WCAG 2.2.2 problem, so the effect only exists for
-    visitors who have not asked their OS for less motion.
-  */
-  @media (prefers-reduced-motion: no-preference) {
-    .cursor {
-      animation: blink 1s step-end infinite;
-    }
-  }
-
-  @keyframes blink {
-    0%,
-    50% {
-      opacity: 1;
-    }
-    51%,
-    100% {
-      opacity: 0;
-    }
   }
 
   h1 {
