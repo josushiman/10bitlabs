@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="10 Bit Labs">
+  <!--
+    The app icon from docs/design/10 Bit Labs Icon.dc.html: a filled "1" beside an
+    outlined "0", in the dark palette. Colours are the hex equivalents of the
+    oklch tokens in src/styles/global.css (--bg, dark --accent) so the file needs
+    no colour-space support to render. The mark is scaled up against the 1024
+    canvas relative to the app icon: at 16px the icon's generous padding leaves
+    the bars too thin to read.
+  -->
+  <rect width="1024" height="1024" fill="#100909"/>
+  <rect x="154.5" y="174" width="286" height="676" rx="73" fill="#f3625d"/>
+  <rect x="620" y="210.5" width="213" height="603" rx="36.5" fill="none" stroke="#f3625d" stroke-width="73"/>
+</svg>
