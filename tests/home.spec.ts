@@ -22,16 +22,23 @@ const styleOf = (locator: Locator, keys: string[]) =>
     keys
   );
 
-/* The accent is stored as an unresolved `light-dark()` pair; a probe resolves it. */
-const accentColour = (page: Page) =>
-  page.evaluate(() => {
+/*
+  What a colour token resolves to where it is used. The palette is stored as
+  unresolved `light-dark()` pairs, so reading the custom property gives the
+  declaration rather than the colour in play; a probe makes the browser resolve
+  it for the palette actually showing.
+*/
+const resolvedColour = (locator: Locator, token: string) =>
+  locator.first().evaluate((element, name) => {
     const probe = document.createElement('div');
-    probe.style.color = 'var(--accent)';
-    document.body.append(probe);
+    probe.style.color = `var(${name})`;
+    element.append(probe);
     const resolved = getComputedStyle(probe).color;
     probe.remove();
     return resolved;
-  });
+  }, token);
+
+const accentColour = (page: Page) => resolvedColour(page.locator('body'), '--accent');
 
 /**
  * What `<n>ch` resolves to on this element — a computed `max-width` is reported
@@ -78,14 +85,7 @@ test.describe('the home page', () => {
     const hero = page.locator('main > section').first().locator('[data-section-label]');
     const [colour, dim, accent] = await Promise.all([
       hero.evaluate((element) => getComputedStyle(element).color),
-      hero.evaluate((element) => {
-        const probe = document.createElement('div');
-        probe.style.color = 'var(--textDim)';
-        element.append(probe);
-        const resolved = getComputedStyle(probe).color;
-        probe.remove();
-        return resolved;
-      }),
+      resolvedColour(hero, '--textDim'),
       accentColour(page)
     ]);
 

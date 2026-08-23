@@ -1,6 +1,7 @@
 ---
 import SectionLabel from './SectionLabel.astro';
 import AppGrid from './AppGrid.astro';
+import RouteLink from './RouteLink.astro';
 import { listApps } from '../lib/apps';
 
 /*
@@ -21,7 +22,7 @@ const apps = await listApps();
 
   <AppGrid apps={apps} minTrack={260} headingLevel={3} />
 
-  <a class="more" href="/apps/">./all-apps →</a>
+  <RouteLink href="/apps/">./all-apps →</RouteLink>
 </section>
 
 <style>
@@ -39,19 +40,12 @@ const apps = await listApps();
   /*
     Invented, and needed: the design linked every card to a store, so its
     featured section had no route to the catalogue of its own. No App has
-    anywhere to link to yet, which would leave this section a dead end. Written
-    in the about teaser's vocabulary — the same mono accent route line — rather
-    than a second button competing with the hero's.
+    anywhere to link to yet, which would leave this section a dead end. It is
+    the site's ordinary route line rather than a second button competing with
+    the hero's.
   */
-  .more {
+  .featured > :global(.route) {
     display: inline-block;
     margin-top: 32px;
-    font-family: var(--font-mono);
-    font-size: 14px;
-    color: var(--accent);
-  }
-
-  .more:hover {
-    opacity: 0.7;
   }
 </style>

@@ -21,7 +21,7 @@ interface Props {
 const { apps, minTrack = 280, headingLevel = 2 } = Astro.props;
 ---
 
-<ul class:list={['grid', { narrow: minTrack === 260 }]} data-app-grid>
+<ul class:list={['grid', minTrack === 260 && 'min-260']} data-app-grid>
   {
     apps.map((app) => (
       <li>
@@ -51,7 +51,7 @@ const { apps, minTrack = 280, headingLevel = 2 } = Astro.props;
     padding: 0;
   }
 
-  .narrow {
+  .min-260 {
     grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   }
 

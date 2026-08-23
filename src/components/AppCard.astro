@@ -11,7 +11,7 @@ interface Props {
 }
 
 const { app, headingLevel = 2 } = Astro.props;
-const Name = `h${headingLevel}` as const;
+const HeadingTag = `h${headingLevel}` as const;
 const { name, initials, description, platform, status, lang } = app.data;
 
 const link = linkOf(app);
@@ -29,7 +29,7 @@ const Card = link ? 'a' : 'div';
   <div class="badge" data-badge aria-hidden="true">{initials}</div>
 
   <div>
-    <Name class="name" lang={lang}>{name}</Name>
+    <HeadingTag class="name" lang={lang}>{name}</HeadingTag>
     <p class="description" data-description>{description}</p>
   </div>
 

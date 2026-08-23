@@ -1,4 +1,5 @@
 ---
+import type { HTMLAttributes } from 'astro/types';
 import SectionLabel from './SectionLabel.astro';
 
 /*
@@ -9,7 +10,11 @@ import SectionLabel from './SectionLabel.astro';
   The ratios are the whole of what these two sections share, so they are stated
   here once; everything either one says lives in its slot.
 */
-interface Props {
+/*
+  Anything else a caller sets — the data hooks the tests find these sections by —
+  travels through to the `<section>`, so the props are the element's own.
+*/
+interface Props extends HTMLAttributes<'section'> {
   label: string;
 }
 

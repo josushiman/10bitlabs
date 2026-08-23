@@ -1,5 +1,6 @@
 ---
 import SplitSection from './SplitSection.astro';
+import RouteLink from './RouteLink.astro';
 
 /*
   The one sentence on the site that saves both sides an email: the Studio builds
@@ -14,21 +15,11 @@ import SplitSection from './SplitSection.astro';
     apps rather than working for hire — favouring the kind of thing we'd want to use
     ourselves.
   </p>
-  <a class="more" href="/about/">./more-about-us →</a>
+  <RouteLink href="/about/">./more-about-us →</RouteLink>
 </SplitSection>
 
 <style>
   p {
     margin: 0 0 20px;
-  }
-
-  .more {
-    font-family: var(--font-mono);
-    font-size: 14px;
-    color: var(--accent);
-  }
-
-  .more:hover {
-    opacity: 0.7;
   }
 </style>

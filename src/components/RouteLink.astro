@@ -1,0 +1,28 @@
+---
+/*
+  The `./somewhere →` line: the design's quiet route out of a section, in the
+  same command style as the menu's `$` items and the hero's button.
+
+  Written once because the featured section and the about teaser both close on
+  one, and the hover is the same 0.7 the design gives every accent link.
+*/
+interface Props {
+  href: string;
+}
+
+const { href } = Astro.props;
+---
+
+<a class="route" {href}><slot /></a>
+
+<style>
+  .route {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .route:hover {
+    opacity: 0.7;
+  }
+</style>
