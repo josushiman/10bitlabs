@@ -1,0 +1,147 @@
+---
+import { linkOf, type App } from '../lib/apps';
+
+interface Props {
+  app: App;
+}
+
+const { app } = Astro.props;
+const { name, initials, description, platform, status, lang } = app.data;
+
+const href = linkOf(app);
+// An App with nowhere real to send anyone is not a link. That is the whole
+// difference between this card and the design's, which assumes every App shipped.
+const Card = href ? 'a' : 'div';
+---
+
+<Card
+  data-card
+  class:list={['card', { linked: !!href }]}
+  {...href ? { href, target: '_blank', rel: 'noopener' } : {}}
+>
+  <div class="badge" data-badge aria-hidden="true">{initials}</div>
+
+  <div>
+    <h2 class="name" lang={lang}>{name}</h2>
+    <p class="description" data-description>{description}</p>
+  </div>
+
+  <div class="foot">
+    <span class="platform" data-platform>{platform}</span>
+    {status === 'in-development' && <span class="tag">In development</span>}
+  </div>
+</Card>
+
+<style>
+  .card {
+    /*
+      The card's accent treatment, named once: the badge tile and the
+      in-development tag are the same wash and edge, and are meant to stay that
+      way rather than being kept in step by hand.
+    */
+    --card-accent-wash: color-mix(in srgb, var(--accent) 14%, transparent);
+    --card-accent-edge: color-mix(in srgb, var(--accent) 30%, transparent);
+    /* The label type the platform line and the tag share. */
+    --card-label-size: 11px;
+    --card-label-tracking: 0.04em;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 26px;
+    height: 100%;
+    box-sizing: border-box;
+    border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+    border-radius: 16px;
+    background: var(--bg2);
+  }
+
+  /* Only a card that goes somewhere reacts to being pointed at. */
+  .linked {
+    transition:
+      transform 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .linked:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .linked {
+      transition: none;
+    }
+
+    .linked:hover {
+      transform: none;
+    }
+  }
+
+  .badge {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--accent);
+    background: var(--card-accent-wash);
+    border: 1px solid var(--card-accent-edge);
+    box-sizing: border-box;
+  }
+
+  .name {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+
+  .description {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--textDim);
+    margin: 0;
+  }
+
+  /*
+    `margin-top:auto` is what keeps the platform labels on one baseline across a
+    row of cards whose descriptions run to different lengths.
+  */
+  .foot {
+    margin-top: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+  }
+
+  .platform {
+    font-family: var(--font-mono);
+    font-size: var(--card-label-size);
+    letter-spacing: var(--card-label-tracking);
+    color: var(--textDim);
+  }
+
+  /*
+    Invented — the design has no in-development state. Built from what the card
+    already says rather than a new vocabulary: the platform label's type at the
+    badge tile's exact accent treatment.
+  */
+  .tag {
+    font-family: var(--font-mono);
+    font-size: var(--card-label-size);
+    letter-spacing: var(--card-label-tracking);
+    padding: 4px 8px;
+    /* The badge tile's radius, so the card carries two corner radii and not three. */
+    border-radius: 14px;
+    color: var(--accent);
+    background: var(--card-accent-wash);
+    border: 1px solid var(--card-accent-edge);
+  }
+</style>

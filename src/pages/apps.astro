@@ -1,0 +1,92 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AppCard from '../components/AppCard.astro';
+import { listApps } from '../lib/apps';
+
+const apps = await listApps();
+---
+
+<BaseLayout
+  title="Apps — 10 Bit Labs"
+  description="The apps 10 Bit Labs is designing and building — every one of them still in development."
+>
+  <section class="intro">
+    <div class="label"><span aria-hidden="true">// </span>apps</div>
+    <h1>Things we're building.</h1>
+    <p>
+      A short and growing list of the apps 10 Bit Labs designs and builds itself. Every
+      one of them is still in development.
+    </p>
+  </section>
+
+  <section class="catalogue">
+    <ul class="grid" data-app-grid>
+      {
+        apps.map((app) => (
+          <li>
+            <AppCard app={app} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 28px 40px;
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 600;
+    margin: 0 0 20px;
+  }
+
+  .intro p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--textDim);
+    max-width: 56ch;
+    margin: 0 0 20px;
+  }
+
+  .catalogue {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 28px 120px;
+  }
+
+  /*
+    The design's `minmax(280px, 1fr)`, floored at the available width: a 280px
+    track does not fit inside a 320px viewport once the 28px gutters are taken,
+    and would push the whole page sideways. `min()` leaves the desktop layout
+    exactly as designed and only bites on the narrowest phones.
+  */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    gap: 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .grid > li {
+    display: flex;
+    min-width: 0;
+  }
+
+  .grid > li > :global(*) {
+    width: 100%;
+  }
+</style>

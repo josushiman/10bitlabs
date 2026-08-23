@@ -23,6 +23,8 @@ export default defineConfig({
   webServer: {
     // Build once per test session, then serve that build for every test.
     command: `npm run build && npx wrangler dev --port ${PORT} --log-level warn`,
+    // Admits the linked-card fixture App into this build only — see src/lib/apps.ts.
+    env: { INCLUDE_APP_FIXTURES: '1' },
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000
