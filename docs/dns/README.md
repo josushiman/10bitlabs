@@ -55,6 +55,17 @@ The apex is a Worker **Custom Domain**, bound once against the zone by
 `scripts/cutover-domain.sh`. Cloudflare writes the apex record when it creates
 the binding; it does not touch the mail records.
 
+Binding is refused while the apex still carries records from the old provider —
+"already has externally managed DNS records (A, CNAME, etc)". The `A` and `AAAA`
+records at the apex have to be deleted first. Nothing else at that name should
+be: `MX` and the two `TXT` records share the name but not the type, mail does
+not consult an `A` record when `MX` records exist, and `sig1._domainkey` and
+`www` are different names altogether.
+
+Delete those two record types with care all the same, because they are proxied
+and therefore the one thing no snapshot in this directory can reproduce — see
+Snapshots below. Take the export first.
+
 It is deliberately **not** declared in `wrangler.jsonc` as a route, and that is
 worth knowing before you "fix" it. Declaring it there —
 
