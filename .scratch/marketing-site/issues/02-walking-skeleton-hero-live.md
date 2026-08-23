@@ -49,21 +49,52 @@ Footer: top border `1px solid color-mix(in srgb, var(--border) 40%, transparent)
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** ready-for-human — the code is done and verified locally; the remaining three criteria need the owner's Cloudflare and GitHub credentials, via `./scripts/setup-deploy.sh`.
 
-- [ ] The hero renders and is legible from a small mobile viewport up to desktop
-- [ ] Body copy renders in the system stack; only headings use Space Grotesk and only labels, buttons, the terminal and the footer use JetBrains Mono
-- [ ] The header, logo mark, theme toggle, terminal window, headline and call to action match the measurements recorded above
-- [ ] Only the weights the design uses are subset and served — Space Grotesk 500/600/700, JetBrains Mono 400/500/600
-- [ ] Both typefaces load from the site's own origin
-- [ ] A visitor whose OS is set to light sees the light palette on first paint, with no dark flash
-- [ ] A visitor whose OS is set to dark sees the dark palette by default
-- [ ] Toggling the theme persists the choice across a reload
-- [ ] The page makes zero third-party network requests
-- [ ] Security headers and the content security policy are present on the served response
-- [ ] The inline theme script executes rather than being blocked by the policy
+- [x] The hero renders and is legible from a small mobile viewport up to desktop
+- [x] Body copy renders in the system stack; only headings use Space Grotesk and only labels, buttons, the terminal and the footer use JetBrains Mono
+- [x] The header, logo mark, theme toggle, terminal window, headline and call to action match the measurements recorded above
+- [x] Only the weights the design uses are subset and served — Space Grotesk 500/600/700, JetBrains Mono 400/500/600
+- [x] Both typefaces load from the site's own origin
+- [x] A visitor whose OS is set to light sees the light palette on first paint, with no dark flash
+- [x] A visitor whose OS is set to dark sees the dark palette by default
+- [x] Toggling the theme persists the choice across a reload
+- [x] The page makes zero third-party network requests
+- [x] Security headers and the content security policy are present on the served response
+- [x] The inline theme script executes rather than being blocked by the policy
 - [ ] Pushing to the main branch deploys the site
 - [ ] A pull request produces a preview URL
-- [ ] The preview hostname serves a `noindex` header
+- [x] The preview hostname serves a `noindex` header
 - [ ] The test suite runs a real browser against the production build served by the hosting tooling, and runs in CI
-- [ ] A wizard exists covering the API token and repository secret steps
+- [x] A wizard exists covering the API token and repository secret steps
+
+## Comments
+
+Implemented. `npm test` builds the site and drives a real browser against
+`wrangler dev`; 16 assertions pass, and `npm run check` is clean.
+
+Three criteria are ticked only once the owner has run `./scripts/setup-deploy.sh`,
+because they need credentials this work is not allowed to create:
+
+- Pushing to the main branch deploys the site
+- A pull request produces a preview URL
+- The test suite runs in CI
+
+`.github/workflows/deploy.yml` implements all three and its YAML parses, but none
+of it has executed — it needs `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`
+in repository secrets first. The wizard's last stage deploys once from the owner's
+own machine, so that a later CI failure is unambiguously a CI problem rather than
+a credentials problem.
+
+Notes for whoever picks up the next ticket:
+
+- The apex itself is not reachable yet. Until the DNS cutover (ticket 03) the site
+  only exists at its `workers.dev` URL, which serves `noindex`.
+- `wrangler.jsonc` sets `not_found_handling: "404-page"` in advance of the 404
+  page arriving with the page set; until then a missing path returns a plain 404,
+  which was checked.
+- The design's own hero copy says "software products and apps". `CONTEXT.md` lists
+  "Product" as a term to avoid for **App**. The design is authoritative for copy
+  the ticket does not correct, so it shipped verbatim — but it is worth a decision
+  either way before the same phrasing spreads to the about and apps pages.
+- The header carries no menu button yet, per this ticket's scope.

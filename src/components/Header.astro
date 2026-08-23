@@ -1,0 +1,166 @@
+---
+// Sticky header chrome. The menu button is deliberately absent until there are
+// pages to navigate to; it arrives with the page set.
+---
+
+<header class="header">
+  <a class="brand" href="/" aria-label="10 Bit Labs, home">
+    <span class="mark" aria-hidden="true">
+      <span class="bar bar-filled"></span>
+      <span class="bar bar-outlined"></span>
+    </span>
+    <span class="wordmark">10 Bit Labs</span>
+  </a>
+
+  <div class="actions">
+    <button
+      id="theme-toggle"
+      type="button"
+      class="toggle"
+      aria-label="Toggle dark/light mode"
+      aria-pressed="false"
+    >
+      <span class="knob" aria-hidden="true"></span>
+    </button>
+  </div>
+</header>
+
+<script>
+  // The blocking script in <head> has already resolved the theme; this only
+  // handles an explicit change and persists it.
+  const toggle = document.getElementById('theme-toggle');
+  const root = document.documentElement;
+
+  const label = (theme: string) =>
+    theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+
+  const sync = () => {
+    const theme = root.dataset.theme ?? 'dark';
+    toggle?.setAttribute('title', label(theme));
+    toggle?.setAttribute('aria-pressed', String(theme === 'light'));
+  };
+
+  toggle?.addEventListener('click', () => {
+    const next = root.dataset.theme === 'light' ? 'dark' : 'light';
+    root.dataset.theme = next;
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      // Private browsing or storage disabled: the choice just does not persist.
+    }
+    sync();
+  });
+
+  sync();
+</script>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 28px;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  /* The same motif as the app icon: a filled "1" and an outlined "0". */
+  .mark {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+
+  .bar {
+    width: 6px;
+    height: 14px;
+    border-radius: 1.5px;
+  }
+
+  .bar-filled {
+    background: var(--accent);
+  }
+
+  .bar-outlined {
+    border: 1.5px solid var(--accent);
+    box-sizing: border-box;
+  }
+
+  .wordmark {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .toggle {
+    width: 44px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+  /*
+    Crimson parks the knob left, Paper parks it right — the design's only piece of
+    state the palette drives that is not a colour. It stays here with the knob
+    rather than becoming a global token: nothing else on the site has an opinion
+    about where this one element sits.
+  */
+  .knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: left 0.2s ease;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :global(html:not([data-theme='dark'])) .knob {
+      left: 22px;
+    }
+  }
+
+  :global(html[data-theme='light']) .knob {
+    left: 22px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .knob {
+      transition: none;
+    }
+  }
+</style>

@@ -1,0 +1,26 @@
+{
+  "name": "10bitlabs-site",
+  "type": "module",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/emit-headers.mjs",
+    "check": "astro check",
+    "serve": "wrangler dev",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.2.0",
+    "astro": "^7.2.4",
+    "typescript": "^5.9.3",
+    "wrangler": "^4.125.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.28.1": true,
+    "workerd@1.20260820.1": true
+  }
+}
