@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+  <style>
+    body{margin:0;}
+    a{color:inherit;text-decoration:none;}
+    @keyframes blink{0%,50%{opacity:1;}51%,100%{opacity:0;}}
+  </style>
+</helmet>
+
+<div style="{{rootStyle}}">
+
+  <header style="position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;padding:22px 28px;background:color-mix(in srgb, var(--bg) 90%, transparent);backdrop-filter:blur(8px);border-bottom:1px solid color-mix(in srgb, var(--border) 40%, transparent);">
+    <div onClick="{{goHome}}" style="display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0;">
+      <div style="width:28px;height:28px;border-radius:8px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:3px;flex-shrink:0;">
+        <div style="width:6px;height:14px;border-radius:1.5px;background:var(--accent);"></div>
+        <div style="width:6px;height:14px;border-radius:1.5px;border:1.5px solid var(--accent);box-sizing:border-box;"></div>
+      </div>
+      <span style="font-family:'JetBrains Mono',monospace;font-weight:600;font-size:15px;letter-spacing:0.01em;white-space:nowrap;flex-shrink:0;">10 Bit Labs</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <button onClick="{{toggleTheme}}" aria-label="Toggle dark/light mode" title="{{themeToggleLabel}}" style="width:44px;height:24px;border-radius:999px;background:var(--bg2);border:1px solid var(--border);position:relative;cursor:pointer;padding:0;flex-shrink:0;">
+        <div style="position:absolute;top:2px;left:{{knobLeft}};width:18px;height:18px;border-radius:50%;background:var(--accent);transition:left 0.2s ease;"></div>
+      </button>
+      <button onClick="{{toggleMenu}}" aria-label="Menu" style="display:flex;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;">
+        <div style="width:22px;height:2px;background:var(--text);border-radius:1px;"></div>
+        <div style="width:22px;height:2px;background:var(--text);border-radius:1px;"></div>
+      </button>
+    </div>
+  </header>
+
+  <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position:fixed;inset:0;z-index:70;background:color-mix(in srgb, var(--bg) 98%, transparent);backdrop-filter:blur(6px);display:flex;flex-direction:column;">
+      <div style="display:flex;justify-content:flex-end;padding:20px 26px;">
+        <button onClick="{{toggleMenu}}" aria-label="Close" style="background:none;border:none;color:var(--text);font-size:30px;cursor:pointer;line-height:1;font-family:'JetBrains Mono',monospace;">×</button>
+      </div>
+      <nav style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 40px 80px;gap:2px;">
+        <sc-for list="{{navItems}}" as="item" hint-placeholder-count="4">
+          <div onClick="{{item.onClick}}" style="display:flex;align-items:baseline;gap:16px;padding:16px 0;border-bottom:1px solid color-mix(in srgb, var(--border) 30%, transparent);cursor:pointer;" style-hover="opacity:0.65;">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--accent);">$</span>
+            <span style="font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,6vw,44px);font-weight:600;color:{{item.color}};">{{item.label}}</span>
+          </div>
+        </sc-for>
+      </nav>
+      <div style="padding:24px 40px 40px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--textDim);">
+        <a href="mailto:hello@10bitlabs.co.uk">$ mail hello@10bitlabs.co.uk</a>
+      </div>
+    </div>
+  </sc-if>
+
+  <main style="flex:1;">
+    <sc-if value="{{isHome}}" hint-placeholder-val="{{true}}">
+      <section style="max-width:1100px;margin:0 auto;padding:100px 28px 90px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--textDim);margin-bottom:18px;">// uk software studio</div>
+        <div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--bg2);">
+          <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);">
+            <div style="width:10px;height:10px;border-radius:50%;background:#ff5f56;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#ffbd2e;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#27c93f;"></div>
+            <div style="margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--textDim);">10bitlabs — zsh</div>
+          </div>
+          <div style="padding:40px 32px 46px;">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--accent);margin-bottom:24px;">$ whoami<span style="animation:blink 1s step-end infinite;">▌</span></div>
+            <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(2.2rem,5.6vw,4rem);line-height:1.08;font-weight:600;margin:0 0 26px;max-width:15ch;letter-spacing:-0.01em;">We build useful apps for interesting problems.</h1>
+            <p style="font-size:18px;line-height:1.6;color:var(--textDim);max-width:52ch;margin:0 0 36px;">10 Bit Labs designs, builds and publishes software products and apps — small, focused tools made to be genuinely useful.</p>
+            <a href="#" onClick="{{goApps}}" style="display:inline-flex;align-items:center;gap:10px;padding:14px 26px;background:var(--accent);color:var(--accentText);border-radius:8px;font-weight:600;font-size:15px;font-family:'JetBrains Mono',monospace;" style-hover="filter:brightness(1.08);">./explore-apps →</a>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1100px;margin:0 auto;padding:0 28px 100px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);margin-bottom:10px;">// featured apps</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.5rem,3vw,2rem);font-weight:600;margin:0 0 40px;">A few things we've shipped</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;">
+          <sc-for list="{{apps}}" as="app" hint-placeholder-count="3">
+            <a href="{{app.url}}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;gap:16px;padding:26px;border:1px solid color-mix(in srgb, var(--border) 40%, transparent);border-radius:16px;background:var(--bg2);transition:transform 0.15s ease, border-color 0.15s ease;" style-hover="border-color:color-mix(in srgb, var(--accent) 60%, transparent);transform:translateY(-2px);">
+              <div style="width:56px;height:56px;border-radius:14px;background:color-mix(in srgb, var(--accent) 14%, transparent);border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:15px;color:var(--accent);">{{app.initials}}</div>
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;margin-bottom:6px;">{{app.name}}</div>
+                <div style="font-size:14px;line-height:1.5;color:var(--textDim);">{{app.desc}}</div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.04em;color:var(--textDim);margin-top:auto;">{{app.platform}}</div>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="max-width:1100px;margin:0 auto;padding:0 28px 100px;display:flex;flex-wrap:wrap;gap:48px;">
+        <div style="flex:1 1 160px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);">// what we do</div>
+        <div style="flex:3 1 420px;">
+          <p style="font-size:18px;line-height:1.6;margin:0 0 32px;max-width:56ch;">We take software from idea through to development and launch — usually a small, product-minded team working end to end on one thing at a time.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:32px;">
+            <div style="flex:1 1 140px;">
+              <div style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:13px;margin-bottom:8px;">01</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;margin-bottom:4px;">Idea</div>
+              <div style="font-size:14px;color:var(--textDim);line-height:1.5;">Shaping a small, clear problem worth solving.</div>
+            </div>
+            <div style="flex:1 1 140px;">
+              <div style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:13px;margin-bottom:8px;">02</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;margin-bottom:4px;">Build</div>
+              <div style="font-size:14px;color:var(--textDim);line-height:1.5;">Designing and developing it properly, end to end.</div>
+            </div>
+            <div style="flex:1 1 140px;">
+              <div style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:13px;margin-bottom:8px;">03</div>
+              <div style="font-family:'Space Grotesk',sans-serif;font-weight:600;margin-bottom:4px;">Launch</div>
+              <div style="font-size:14px;color:var(--textDim);line-height:1.5;">Publishing it, and sticking around to maintain it.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1100px;margin:0 auto;padding:0 28px 100px;display:flex;flex-wrap:wrap;gap:48px;">
+        <div style="flex:1 1 160px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);">// about</div>
+        <div style="flex:3 1 420px;">
+          <p style="font-size:18px;line-height:1.6;max-width:56ch;margin:0 0 20px;">10 Bit Labs is a small UK software studio. We design, build and publish our own apps rather than working for hire — favouring products we'd actually want to use ourselves.</p>
+          <a href="#" onClick="{{goAbout}}" style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--accent);" style-hover="opacity:0.7;">./more-about-us →</a>
+        </div>
+      </section>
+
+      <section style="border-top:1px solid color-mix(in srgb, var(--border) 40%, transparent);padding:90px 28px;text-align:center;">
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:600;margin:0 auto 20px;max-width:20ch;">Have an idea or want to get in touch?</h2>
+        <a href="mailto:hello@10bitlabs.co.uk" style="font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--accent);" style-hover="opacity:0.7;">$ mail hello@10bitlabs.co.uk<span style="animation:blink 1s step-end infinite;">▌</span></a>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isApps}}" hint-placeholder-val="{{false}}">
+      <section style="max-width:1100px;margin:0 auto;padding:80px 28px 40px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);margin-bottom:14px;">// apps</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,4.5vw,3rem);font-weight:600;margin:0 0 20px;">Things we've built.</h1>
+        <p style="font-size:17px;line-height:1.6;color:var(--textDim);max-width:56ch;margin:0 0 20px;">A short, growing list of apps we design, build and maintain ourselves.</p>
+      </section>
+      <section style="max-width:1100px;margin:0 auto;padding:0 28px 120px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;">
+          <sc-for list="{{apps}}" as="app" hint-placeholder-count="3">
+            <a href="{{app.url}}" target="_blank" rel="noopener" style="display:flex;flex-direction:column;gap:16px;padding:26px;border:1px solid color-mix(in srgb, var(--border) 40%, transparent);border-radius:16px;background:var(--bg2);transition:transform 0.15s ease, border-color 0.15s ease;" style-hover="border-color:color-mix(in srgb, var(--accent) 60%, transparent);transform:translateY(-2px);">
+              <div style="width:56px;height:56px;border-radius:14px;background:color-mix(in srgb, var(--accent) 14%, transparent);border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:15px;color:var(--accent);">{{app.initials}}</div>
+              <div>
+                <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;margin-bottom:6px;">{{app.name}}</div>
+                <div style="font-size:14px;line-height:1.5;color:var(--textDim);">{{app.desc}}</div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.04em;color:var(--textDim);margin-top:auto;">{{app.platform}}</div>
+            </a>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isAbout}}" hint-placeholder-val="{{false}}">
+      <section style="max-width:760px;margin:0 auto;padding:80px 28px 100px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);margin-bottom:14px;">// about</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(2rem,4.5vw,3rem);font-weight:600;margin:0 0 32px;">A small studio, not an agency.</h1>
+        <p style="font-size:18px;line-height:1.7;color:var(--text);margin:0 0 22px;">10 Bit Labs Ltd is a UK-registered software studio. We design, build and publish our own apps and software products, rather than working as contractors for other companies.</p>
+        <p style="font-size:18px;line-height:1.7;color:var(--text);margin:0 0 22px;">Our approach is simple: pick a problem worth solving, build something well-considered around it, and keep it maintained after launch. We'd rather ship a handful of apps we're proud of than a long list of half-finished ones.</p>
+        <p style="font-size:18px;line-height:1.7;color:var(--text);margin:0 0 40px;">Each app we release is treated as its own product, with its own audience and its own privacy policy and terms, hosted where it lives — App Store, Google Play, or its own website.</p>
+        <div style="border:1px solid color-mix(in srgb, var(--border) 40%, transparent);border-radius:12px;padding:24px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.9;color:var(--textDim);">
+          <div>10 Bit Labs Ltd</div>
+          <div>Company no. 17378712</div>
+          <div>13 Dunmow Close, Loughton, IG10</div>
+          <div><a href="mailto:hello@10bitlabs.co.uk" style-hover="color:var(--accent);">hello@10bitlabs.co.uk</a></div>
+        </div>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isContact}}" hint-placeholder-val="{{false}}">
+      <section style="max-width:640px;margin:0 auto;padding:120px 28px 140px;text-align:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);margin-bottom:14px;">// contact</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:600;margin:0 0 24px;">Get in touch.</h1>
+        <p style="font-size:17px;line-height:1.6;color:var(--textDim);margin:0 0 40px;">There's no contact form — the easiest way to reach us is by email. We read everything and reply as soon as we can.</p>
+        <a href="mailto:hello@10bitlabs.co.uk" style="font-family:'JetBrains Mono',monospace;font-size:clamp(18px,3.2vw,24px);font-weight:600;color:var(--accent);" style-hover="opacity:0.7;">$ mail hello@10bitlabs.co.uk</a>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isPrivacy}}" hint-placeholder-val="{{false}}">
+      <section style="max-width:680px;margin:0 auto;padding:100px 28px 120px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);margin-bottom:14px;">// privacy</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:600;margin:0 0 28px;">Privacy.</h1>
+        <p style="font-size:16px;line-height:1.7;color:var(--text);margin:0 0 20px;">This website does not use analytics or tracking, does not have user accounts, and does not collect personal data through a contact form — there isn't one.</p>
+        <p style="font-size:16px;line-height:1.7;color:var(--text);margin:0 0 20px;">If you email us, we use your address only to reply to you.</p>
+        <p style="font-size:16px;line-height:1.7;color:var(--text);margin:0 0 20px;">Our individual apps are separate products, each with its own privacy policy hosted where the app is listed — App Store, Google Play, or its own website.</p>
+      </section>
+    </sc-if>
+
+    <sc-if value="{{isLegal}}" hint-placeholder-val="{{false}}">
+      <section style="max-width:680px;margin:0 auto;padding:100px 28px 120px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);margin-bottom:14px;">// company</div>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:600;margin:0 0 28px;">Company details.</h1>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:14px;line-height:2;color:var(--text);">
+          <div>10 Bit Labs Ltd</div>
+          <div>Registered in England and Wales</div>
+          <div>Company number: 17378712</div>
+          <div>Registered address: 13 Dunmow Close, Loughton, IG10</div>
+          <div><a href="mailto:hello@10bitlabs.co.uk" style-hover="color:var(--accent);">hello@10bitlabs.co.uk</a></div>
+        </div>
+      </section>
+    </sc-if>
+  </main>
+
+  <footer style="border-top:1px solid color-mix(in srgb, var(--border) 40%, transparent);width:100%;box-sizing:border-box;">
+    <div style="max-width:1100px;margin:0 auto;padding:32px 28px;display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:space-between;align-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--textDim);">
+      <div>// © {{year}} 10 Bit Labs Ltd</div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <a href="#" onClick="{{goPrivacy}}" style-hover="color:var(--text);">Privacy</a>
+        <a href="#" onClick="{{goLegal}}" style-hover="color:var(--text);">Company details</a>
+        <a href="mailto:hello@10bitlabs.co.uk" style-hover="color:var(--text);">hello@10bitlabs.co.uk</a>
+      </div>
+    </div>
+  </footer>
+
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { page: 'home', menuOpen: false, paletteIndex: 0 };
+
+  palettesData = [
+    { name: 'Crimson', bg: 'oklch(0.15 0.012 25)', bg2: 'oklch(0.195 0.014 25)', border: 'oklch(0.32 0.02 25)', text: 'oklch(0.93 0.006 25)', textDim: 'oklch(0.63 0.015 25)', accent: 'oklch(0.68 0.18 25)', accentText: 'oklch(0.14 0.01 25)' },
+    { name: 'Paper', bg: 'oklch(0.97 0.006 95)', bg2: 'oklch(0.94 0.008 95)', border: 'oklch(0.75 0.01 95)', text: 'oklch(0.22 0.01 95)', textDim: 'oklch(0.45 0.015 95)', accent: 'oklch(0.5 0.15 145)', accentText: 'oklch(0.98 0.005 95)' }
+  ];
+
+  go(page) {
+    this.setState({ page, menuOpen: false });
+    window.scrollTo(0, 0);
+  }
+
+  renderVals() {
+    const p = this.state.page;
+    const idx = this.state.paletteIndex;
+    const cur = this.palettesData[idx];
+
+    const rootStyle = {
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      '--bg': cur.bg, '--bg2': cur.bg2, '--border': cur.border, '--text': cur.text, '--textDim': cur.textDim, '--accent': cur.accent, '--accentText': cur.accentText,
+      background: 'var(--bg)', color: 'var(--text)',
+      fontFamily: "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif"
+    };
+
+    const navItems = ['home', 'apps', 'about', 'contact'].map((k) => ({
+      key: k,
+      label: k.charAt(0).toUpperCase() + k.slice(1),
+      color: p === k ? 'var(--accent)' : 'var(--text)',
+      onClick: () => this.go(k)
+    }));
+
+    const apps = [
+      { id: 'tally', name: 'Tally', desc: 'A minimal counter and habit tracker for quick daily check-ins.', platform: 'iOS · App Store', url: '#', initials: 'TA' },
+      { id: 'driftnote', name: 'Driftnote', desc: 'Fast voice-to-text notes that stay out of your way.', platform: 'iOS & Android', url: '#', initials: 'DN' },
+      { id: 'fieldkit', name: 'Fieldkit', desc: 'A pocket toolkit for outdoor shooting — light, tide and sun times.', platform: 'macOS & iOS', url: '#', initials: 'FK' }
+    ];
+
+    const isDark = idx === 0;
+
+    return {
+      rootStyle,
+      menuOpen: this.state.menuOpen,
+      navItems,
+      apps,
+      isDark,
+      knobLeft: isDark ? '2px' : '22px',
+      themeToggleLabel: isDark ? 'Switch to light mode' : 'Switch to dark mode',
+      toggleTheme: () => this.setState(s => ({ paletteIndex: s.paletteIndex === 0 ? 1 : 0 })),
+      isHome: p === 'home',
+      isApps: p === 'apps',
+      isAbout: p === 'about',
+      isContact: p === 'contact',
+      isPrivacy: p === 'privacy',
+      isLegal: p === 'legal',
+      goHome: () => this.go('home'),
+      goApps: () => this.go('apps'),
+      goAbout: () => this.go('about'),
+      goContact: () => this.go('contact'),
+      goPrivacy: () => this.go('privacy'),
+      goLegal: () => this.go('legal'),
+      toggleMenu: () => this.setState(s => ({ menuOpen: !s.menuOpen })),
+      year: new Date().getFullYear()
+    };
+  }
+}
+</script>
+</body>
+</html>
