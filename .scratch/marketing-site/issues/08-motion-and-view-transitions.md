@@ -25,14 +25,81 @@ The cross-fade and the shared-element card-to-detail transition have no design p
 
 **Blocked by:** 06 — The rest of the page set, reachable via the menu. 07 — Home page completion.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Navigating between pages animates rather than flashing white
-- [ ] An App card transitions into its detail page where such a page exists
-- [ ] The theme toggle still works after navigating between pages
-- [ ] The menu still opens, traps focus and closes on Escape after navigating between pages
-- [ ] The theme preference survives navigation without a flash of the wrong palette
-- [ ] Under reduced-motion preference, the terminal cursor does not blink
-- [ ] Under reduced-motion preference, page transitions and hover effects are instant
-- [ ] The browser back button still works throughout
-- [ ] Every page still makes zero third-party network requests
+- [x] Navigating between pages animates rather than flashing white
+- [x] An App card transitions into its detail page where such a page exists
+- [x] The theme toggle still works after navigating between pages
+- [x] The menu still opens, traps focus and closes on Escape after navigating between pages
+- [x] The theme preference survives navigation without a flash of the wrong palette
+- [x] Under reduced-motion preference, the terminal cursor does not blink
+- [x] Under reduced-motion preference, page transitions and hover effects are instant
+- [x] The browser back button still works throughout
+- [x] Every page still makes zero third-party network requests
+
+## Comments
+
+### Decisions made while implementing
+
+- **Astro's `ClientRouter`, wrapped in `src/components/PageTransitions.astro`.**
+  The router itself is a few lines; everything around it is the footgun this
+  ticket named. The component holds the router and the two things a swap would
+  otherwise lose, so there is one file to read when navigation misbehaves.
+- **No `transition:*` directives anywhere.** Astro implements them by pushing a
+  raw `<style>` element into the head, and this site's policy is `style-src
+  'self'` with no `'unsafe-inline'` — every one of those would be refused, and
+  the site would silently lose its shared element. The name is a plain rule in
+  `global.css` against a `data-shared-title` attribute instead, and JavaScript
+  decides which single element wears it.
+- **The shared element is the App's name, not the whole card.** A card is a
+  bordered tile on a wash; the detail page has no counterpart to morph it into.
+  The name is the one thing genuinely present on both sides, and watching it
+  travel from the card up to the page heading is what makes arriving continuous
+  with leaving. Both sides are found by `data-app-title="<slug>"`.
+- **Both sides get named, or neither.** A view transition name with nothing to
+  pair against still animates — as a second fade competing with the page's — so
+  the pairing is only set up once both documents are in hand and both actually
+  carry the heading. That is why the work hangs off the router's loader rather
+  than off `astro:before-preparation` directly: the loader is the one moment
+  where the incoming document exists and the outgoing page has not yet been
+  photographed. It is also what makes the back button animate the detail page's
+  heading back down into its card, with no extra code for the reverse.
+- **The palette is carried across at `astro:before-swap`.** The swap replaces
+  every attribute on `<html>` with the incoming document's, and that document
+  has never had the blocking theme script run against it — so without this the
+  palette snaps back to the OS preference on the first navigation. Reading it at
+  swap time rather than when the fetch finished also means a visitor who hits the
+  toggle while the next page is still loading keeps their choice.
+- **Every control is bound on `astro:page-load`, and immediately as well.** The
+  bundled scripts are not re-run after a swap, but the button they were listening
+  to has been replaced. Binding on both, deduplicated through a `WeakSet` of the
+  elements themselves, means the controls also survive the router failing to load
+  at all. The menu's keyboard trap is the exception: it listens on the document,
+  which a swap leaves alone, and looks its elements up when it needs them.
+- **Prefetch stays on.** It was going to be turned off on the assumption that
+  `<link rel="prefetch">` is refused under `default-src 'none'`. Measured against
+  a real build, Chromium raises no violation and the fetch goes through — so the
+  assumption was wrong and the restriction was dropped. A test now walks a
+  navigation watching the console, because a refused prefetch would otherwise be
+  invisible.
+- **Reduced motion was already half-built.** Tickets 06 and 07 had gated the
+  cursor blink and the card hover behind `prefers-reduced-motion`. This ticket
+  adds the page transitions, and puts numbers on the existing two: the cursor's
+  1s step-end square wave, and the card's 0s transition and absent lift under a
+  reduced-motion preference, are now asserted rather than assumed.
+
+### Notes for whoever picks up the next ticket
+
+- Navigation no longer reloads the document. Anything new that binds a listener
+  to an element inside `<body>` has to bind on `astro:page-load`, or it will work
+  on first load and silently stop working after the first navigation. Both
+  `Header.astro` and `MenuOverlay.astro` show the shape.
+- A new route needs nothing done to it to take part in the cross-fade. A new
+  shared element does: give the two elements a matching `data-` hook, and teach
+  `PageTransitions.astro` which pair of URLs it sits between.
+- `tests/motion.spec.ts` measures the transition by wrapping
+  `document.startViewTransition` and timing its `finished` promise, which is the
+  only way to tell a cross-fade from an instant cut from outside the browser.
+  Note that `addInitScript` runs in a fresh context per document, so a counter
+  written there cannot detect a reload — the spec leaves a marker on `window`
+  after `goto` instead.

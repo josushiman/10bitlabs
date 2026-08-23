@@ -67,65 +67,80 @@ const here = Astro.url.pathname;
     Everything here exists so the menu is usable without a mouse. An overlay that
     covers the page but leaves the page tabbable is worse than no overlay: a
     keyboard visitor walks into content they cannot see.
+
+    Every element is looked up when it is needed rather than held on to, because
+    navigation swaps the document rather than reloading it: this script is not
+    re-run, and anything captured on the first page would be pointing at an
+    element that has since been thrown away.
   */
-  const menu = document.querySelector<HTMLElement>('[data-menu]');
-  const button = document.querySelector<HTMLButtonElement>('[data-menu-button]');
-  const closeButton = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+  const bound = new WeakSet<Element>();
 
-  if (menu && button && closeButton) {
-    const focusable = () => [...menu.querySelectorAll<HTMLElement>('a[href], button')];
+  const overlay = () => document.querySelector<HTMLElement>('[data-menu]');
+  const opener = () => document.querySelector<HTMLButtonElement>('[data-menu-button]');
 
-    const open = () => {
-      menu.hidden = false;
-      button.setAttribute('aria-expanded', 'true');
-      document.body.classList.add('menu-open');
-      closeButton.focus();
-    };
+  // Focus goes to the close button when the menu opens, and back to the button
+  // that opened it when it shuts: that is where the visitor was, and it is still
+  // on screen once the overlay has gone.
+  const setOpen = (open: boolean) => {
+    const menu = overlay();
+    const button = opener();
+    if (!menu || !button) return;
 
-    // Focus always comes back to the button that opened the menu: it is where
-    // the visitor was, and it is still on screen once the overlay has gone.
-    const shut = () => {
-      menu.hidden = true;
-      button.setAttribute('aria-expanded', 'false');
-      document.body.classList.remove('menu-open');
-      button.focus();
-    };
+    menu.hidden = !open;
+    button.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('menu-open', open);
+    (open ? menu.querySelector<HTMLElement>('[data-menu-close]') : button)?.focus();
+  };
 
-    button.addEventListener('click', () => (menu.hidden ? open() : shut()));
-    closeButton.addEventListener('click', shut);
+  const bind = () => {
+    const menu = overlay();
+    const button = opener();
+    const close = menu?.querySelector<HTMLButtonElement>('[data-menu-close]');
+    if (!menu || !button || !close || bound.has(button)) return;
 
-    /*
-      Bound to the document rather than to the overlay, because focus is not
-      always inside the overlay: clicking its background — the padding around the
-      list, say — moves focus to <body>, and a listener on the overlay would then
-      never hear the keys at all. Tab would walk into the page behind the blur and
-      Escape would do nothing.
-    */
-    document.addEventListener('keydown', (event) => {
-      if (menu.hidden) return;
+    bound.add(button);
+    button.addEventListener('click', () => setOpen(menu.hidden));
+    close.addEventListener('click', () => setOpen(false));
+  };
 
-      if (event.key === 'Escape') {
-        shut();
-        return;
-      }
-      if (event.key !== 'Tab') return;
+  bind();
+  document.addEventListener('astro:page-load', bind);
 
-      const items = focusable();
-      if (items.length === 0) return;
+  /*
+    Bound to the document rather than to the overlay, because focus is not
+    always inside the overlay: clicking its background — the padding around the
+    list, say — moves focus to <body>, and a listener on the overlay would then
+    never hear the keys at all. Tab would walk into the page behind the blur and
+    Escape would do nothing.
 
-      const first = items[0];
-      const last = items[items.length - 1];
-      const inside = menu.contains(document.activeElement);
-      const edge = event.shiftKey ? first : last;
+    Bound once, and to the document, it is also the one listener here that a
+    document swap leaves alone.
+  */
+  document.addEventListener('keydown', (event) => {
+    const menu = overlay();
+    if (!menu || menu.hidden) return;
 
-      // Tabbing off either end wraps back in; tabbing from outside comes back in
-      // at whichever end the visitor was heading for.
-      if (inside && document.activeElement !== edge) return;
+    if (event.key === 'Escape') {
+      setOpen(false);
+      return;
+    }
+    if (event.key !== 'Tab') return;
 
-      event.preventDefault();
-      (event.shiftKey ? last : first).focus();
-    });
-  }
+    const items = [...menu.querySelectorAll<HTMLElement>('a[href], button')];
+    if (items.length === 0) return;
+
+    const first = items[0];
+    const last = items[items.length - 1];
+    const inside = menu.contains(document.activeElement);
+    const edge = event.shiftKey ? first : last;
+
+    // Tabbing off either end wraps back in; tabbing from outside comes back in
+    // at whichever end the visitor was heading for.
+    if (inside && document.activeElement !== edge) return;
+
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  });
 </script>
 
 <style>

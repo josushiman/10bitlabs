@@ -45,32 +45,52 @@ import MenuOverlay from './MenuOverlay.astro';
 <MenuOverlay />
 
 <script>
-  // The blocking script in <head> has already resolved the theme; this only
-  // handles an explicit change and persists it.
-  const toggle = document.getElementById('theme-toggle');
+  /*
+    The blocking script in <head> has already resolved the theme; this only
+    handles an explicit change and persists it.
+
+    Bound on `astro:page-load` rather than once, because navigation swaps the
+    document rather than reloading it: this script is not re-run, but the button
+    it was listening to has been replaced. Bound immediately as well, so the
+    control still works if the router never arrives — and deduplicated by the
+    element itself, so the two never stack up on the same button.
+  */
   const root = document.documentElement;
+  const bound = new WeakSet<Element>();
 
   const label = (theme: string) =>
     theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
 
-  const sync = () => {
+  const sync = (toggle: HTMLElement) => {
     const theme = root.dataset.theme ?? 'dark';
-    toggle?.setAttribute('title', label(theme));
-    toggle?.setAttribute('aria-pressed', String(theme === 'light'));
+    toggle.setAttribute('title', label(theme));
+    toggle.setAttribute('aria-pressed', String(theme === 'light'));
   };
 
-  toggle?.addEventListener('click', () => {
-    const next = root.dataset.theme === 'light' ? 'dark' : 'light';
-    root.dataset.theme = next;
-    try {
-      localStorage.setItem('theme', next);
-    } catch {
-      // Private browsing or storage disabled: the choice just does not persist.
-    }
-    sync();
-  });
+  const bind = () => {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
 
-  sync();
+    if (!bound.has(toggle)) {
+      bound.add(toggle);
+      toggle.addEventListener('click', () => {
+        root.dataset.theme = root.dataset.theme === 'light' ? 'dark' : 'light';
+        try {
+          localStorage.setItem('theme', root.dataset.theme);
+        } catch {
+          // Private browsing or storage disabled: the choice just does not persist.
+        }
+        sync(toggle);
+      });
+    }
+
+    // Every page is served with the same starting markup, so the control has to
+    // be told again which palette it is actually sitting in.
+    sync(toggle);
+  };
+
+  bind();
+  document.addEventListener('astro:page-load', bind);
 </script>
 
 <style>

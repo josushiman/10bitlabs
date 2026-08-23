@@ -128,3 +128,62 @@ h3 {
     opacity: 0;
   }
 }
+
+/*
+  Page transitions. Same-origin navigation swaps the document in place rather
+  than reloading it — see src/components/PageTransitions.astro — which lets the
+  browser cross-fade one page into the next instead of flashing white between
+  them.
+
+  The durations sit with the 0.15s and 0.2s the design already spends on its card
+  hovers and its theme toggle, rather than introducing a slower, showier
+  vocabulary of their own.
+*/
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.18s;
+  animation-timing-function: ease;
+}
+
+/*
+  The site's one shared element: an App's name on its card, and the same name as
+  the heading of its detail page. Exactly one element may carry a view transition
+  name at a time, so the mark is applied to the pair a navigation is between and
+  taken back afterwards, in JavaScript, rather than written onto every card here.
+*/
+[data-shared-title] {
+  view-transition-name: app-title;
+}
+
+::view-transition-group(app-title) {
+  animation-duration: 0.2s;
+  animation-timing-function: ease;
+}
+
+/*
+  Asked for less motion, every transition above becomes an instant cut. Browsers
+  do not do this on their own — a view transition runs its cross-fade whatever
+  the visitor has asked for — so the animations are taken away here, and the
+  outgoing page is hidden outright rather than left sitting at full opacity on
+  top of the incoming one for the frame it takes to notice there is nothing to
+  wait for.
+
+  `!important` because a named pseudo-element — `(root)`, `(app-title)` — is more
+  specific than the `(*)` these rules have to reach all of.
+*/
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  ::view-transition-old(*) {
+    opacity: 0;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-new(*) {
+    mix-blend-mode: normal;
+  }
+}

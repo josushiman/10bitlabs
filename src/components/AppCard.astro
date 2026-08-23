@@ -29,7 +29,12 @@ const Card = link ? 'a' : 'div';
   <div class="badge" data-badge aria-hidden="true">{initials}</div>
 
   <div>
-    <HeadingTag class="name" lang={lang}>{name}</HeadingTag>
+    {/*
+      `data-app-title` is how a navigation finds the two headings that name the
+      same App — this one and its detail page's — so it can animate the one into
+      the other. See src/components/PageTransitions.astro.
+    */}
+    <HeadingTag class="name" lang={lang} data-app-title={app.id}>{name}</HeadingTag>
     <p class="description" data-description>{description}</p>
   </div>
 

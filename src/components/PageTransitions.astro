@@ -1,0 +1,117 @@
+---
+import { ClientRouter } from 'astro:transitions';
+
+/*
+  Same-origin navigation, intercepted and animated rather than reloaded.
+
+  The source design was a single-page application, so moving between sections
+  cost nothing visually. Real URLs bought bookmarkable, indexable, shareable
+  pages and gave that up; this buys it back, by swapping the document in place
+  and letting the browser cross-fade one page into the next.
+
+  The router also prefetches a link once a visitor hovers it, which is what makes
+  the cross-fade start on the click rather than after a round trip. Those fetches
+  are same-origin, so they cost the site's privacy position nothing; a test walks
+  a navigation watching for anything the content policy refuses, because a
+  refused prefetch would be invisible otherwise.
+*/
+---
+
+<ClientRouter />
+
+<script>
+  import type {
+    TransitionBeforePreparationEvent,
+    TransitionBeforeSwapEvent
+  } from 'astro:transitions/client';
+
+  /*
+    Two things a document swap needs told, and both need telling while the
+    incoming document is in hand but not yet on screen. The router hands that
+    moment over as the loader it is about to run, so both happen there:
+    afterwards the page is painted with the answers already in place, and there
+    is no frame with the wrong one in it.
+  */
+
+  /** Marks the one element carrying the name across this navigation. */
+  const SHARED = 'data-shared-title';
+
+  /** The App this URL is the detail page of, if that is what it is. */
+  const appOf = (url: URL) => url.pathname.match(/^\/apps\/([^/]+)\/$/)?.[1];
+
+  /** Whatever names this App on this page — a card's heading, or the page's own. */
+  const headingFor = (doc: Document, slug: string) =>
+    doc.querySelector<HTMLElement>(`[data-app-title="${CSS.escape(slug)}"]`);
+
+  const unmark = (doc: Document) =>
+    doc.querySelectorAll(`[${SHARED}]`).forEach((element) => element.removeAttribute(SHARED));
+
+  /**
+   * Names an App's heading on both sides of this navigation, if both have one.
+   *
+   * A view transition name may only be on one element at a time, so every
+   * navigation starts by taking the last one back. Naming both sides or neither
+   * is the other half of the rule: a name with nothing to morph into animates on
+   * its own, which reads as a second fade competing with the page's.
+   */
+  const pairHeadings = (incoming: Document, from: URL, to: URL) => {
+    unmark(document);
+    unmark(incoming);
+
+    const slug = appOf(to) ?? appOf(from);
+    if (!slug) return;
+
+    const leaving = headingFor(document, slug);
+    const arriving = headingFor(incoming, slug);
+    if (!leaving || !arriving) return;
+
+    leaving.setAttribute(SHARED, '');
+    arriving.setAttribute(SHARED, '');
+  };
+
+  /*
+    Pairing has to happen while both documents are in hand and neither is on
+    screen: the browser photographs the outgoing page the moment the transition
+    starts, so a name added after that is a name it never saw. The router runs
+    its loader in exactly that gap, so the work goes there — wrapped rather than
+    replaced, because fetching the page is the loader's own job.
+
+    The loader gives up on anything it cannot swap — a failed fetch, a response
+    that is not a page this router built — and says so by leaving `newDocument`
+    as the one already on screen. The router turns those into an ordinary
+    browser navigation, and there is nothing here to prepare.
+  */
+  document.addEventListener('astro:before-preparation', (event) => {
+    const preparation = event as TransitionBeforePreparationEvent;
+    const load = preparation.loader;
+
+    preparation.loader = async () => {
+      await load();
+      const incoming = preparation.newDocument;
+      if (preparation.defaultPrevented || incoming === document) return;
+
+      // Read after the fetch, so a link answered with a redirect pairs against
+      // the address it actually landed on.
+      pairHeadings(incoming, preparation.from, preparation.to);
+    };
+  });
+
+  /*
+    The palette, carried onto the incoming document.
+
+    The blocking script in <head> stamps `data-theme` on <html>, and the swap
+    replaces every attribute on <html> with the incoming document's — which has
+    never had that script run against it. Without this the palette snaps back to
+    the operating system's preference the first time a visitor navigates.
+
+    Read here rather than alongside the pairing above, because this event fires
+    in the same breath as the swap itself: a visitor who reaches for the toggle
+    while the next page is still loading has their choice carried across, rather
+    than overwritten by whatever the palette was when the fetch finished.
+  */
+  document.addEventListener('astro:before-swap', (event) => {
+    const { newDocument } = event as TransitionBeforeSwapEvent;
+    const theme = document.documentElement.dataset.theme;
+    if (theme) newDocument.documentElement.dataset.theme = theme;
+  });
+</script>
