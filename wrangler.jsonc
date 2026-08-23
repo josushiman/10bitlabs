@@ -12,4 +12,20 @@
   // The always-on workers.dev subdomain exists only to give pull requests a
   // preview URL. Every non-apex hostname serves noindex — see dist/_headers.
   "workers_dev": true
+
+  // The apex Custom Domain is deliberately NOT declared here as a route, and
+  // this is a trap worth marking: adding
+  //
+  //   "routes": [{ "pattern": "10bitlabs.co.uk", "custom_domain": true }]
+  //
+  // makes `wrangler dev` serve every local request as though it arrived at the
+  // apex. The apex is the one hostname exempted from X-Robots-Tag, so the
+  // exemption then applies to everything locally, and the test that a preview
+  // hostname is non-indexable stops describing production. Measured, not
+  // assumed — see the comment on ticket 03.
+  //
+  // The binding is made once, against the zone, by ./scripts/cutover-domain.sh.
+  // www is not bound to the Worker at all: it would serve the site rather than
+  // redirect to it, leaving two hostnames that both look canonical. It is a
+  // zone redirect rule instead — see docs/dns/README.md.
 }

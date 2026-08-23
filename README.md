@@ -56,3 +56,33 @@ also the escape hatch if CI is broken:
 ```bash
 npm run build && npx wrangler deploy
 ```
+
+## The domain, and the mailbox sharing it
+
+`10bitlabs.co.uk` carries `hello@10bitlabs.co.uk`, an iCloud+ custom domain
+mailbox that predates this repository. Five DNS records keep it working, and the
+site must never be allowed to disturb them —
+[`docs/dns/README.md`](docs/dns/README.md) is the record inventory, the reasons
+each one matters, and the rollback.
+
+Binding the apex and redirecting `www` are the owner's to drive. Run the wizard:
+
+```bash
+./scripts/cutover-domain.sh
+```
+
+It expects `./scripts/setup-deploy.sh` to have run first, because it deploys the
+Worker before pointing the domain at it.
+
+Whatever can be checked from outside is checked by one command, which asserts the
+delegation, all five mail records, the absence of Cloudflare Email Routing, the
+apex, the `www` redirect and the preview host's `noindex`:
+
+```bash
+./scripts/verify-cutover.sh
+```
+
+Neither DNS nor mail is reachable from the Playwright seam, and the spec rules out
+pretending otherwise. That script is what stands in place of a test, and the two
+mail checks — a message arriving, and a message sent passing DKIM and SPF at the
+recipient — have no automated substitute at all.
