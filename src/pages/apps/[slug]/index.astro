@@ -37,7 +37,7 @@ const { Content } = await render(app);
   <article class="page column">
     <a class="back" href="/apps/"><span aria-hidden="true">← </span>All apps</a>
 
-    <SectionLabel class="label">app</SectionLabel>
+    <SectionLabel spaceBelow={14}>app</SectionLabel>
     <h1 lang={lang}>{name}</h1>
     <p class="standfirst">{description}</p>
 
@@ -88,10 +88,6 @@ const { Content } = await render(app);
 
   .back:hover {
     color: var(--accent);
-  }
-
-  .label {
-    margin-bottom: 14px;
   }
 
   h1 {

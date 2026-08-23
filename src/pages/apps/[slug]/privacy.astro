@@ -45,7 +45,7 @@ const updatedLabel = updated?.toLocaleDateString('en-GB', {
   description={`How ${app.data.name} handles your data.`}
 >
   <article class="page column">
-    <SectionLabel class="label">privacy</SectionLabel>
+    <SectionLabel spaceBelow={14}>privacy</SectionLabel>
     <h1 class:list={{ undated: !updated }}>
       <span lang={app.data.lang}>{app.data.name}</span> privacy policy
     </h1>
@@ -68,10 +68,6 @@ const updatedLabel = updated?.toLocaleDateString('en-GB', {
   .page {
     max-width: 680px;
     padding-block: 100px 120px;
-  }
-
-  .label {
-    margin-bottom: 14px;
   }
 
   h1 {

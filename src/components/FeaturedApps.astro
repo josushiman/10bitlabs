@@ -1,0 +1,57 @@
+---
+import SectionLabel from './SectionLabel.astro';
+import AppGrid from './AppGrid.astro';
+import { listApps } from '../lib/apps';
+
+/*
+  The home page's featured Apps: the catalogue's own cards, from the catalogue's
+  own list. The only thing this section decides is the design's narrower track
+  floor and the route through to the full catalogue.
+
+  The design's heading — "A few things we've shipped" — is not true of any App
+  the Studio has, so it states what is being built instead. The type scale,
+  spacing and position are the design's.
+*/
+const apps = await listApps();
+---
+
+<section class="featured column" data-featured-apps>
+  <SectionLabel spaceBelow={10}>featured apps</SectionLabel>
+  <h2>A few things we're building</h2>
+
+  <AppGrid apps={apps} minTrack={260} headingLevel={3} />
+
+  <a class="more" href="/apps/">./all-apps →</a>
+</section>
+
+<style>
+  .featured {
+    max-width: 1100px;
+    padding-block: 0 100px;
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 600;
+    margin: 0 0 40px;
+  }
+
+  /*
+    Invented, and needed: the design linked every card to a store, so its
+    featured section had no route to the catalogue of its own. No App has
+    anywhere to link to yet, which would leave this section a dead end. Written
+    in the about teaser's vocabulary — the same mono accent route line — rather
+    than a second button competing with the hero's.
+  */
+  .more {
+    display: inline-block;
+    margin-top: 32px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .more:hover {
+    opacity: 0.7;
+  }
+</style>

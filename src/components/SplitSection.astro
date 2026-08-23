@@ -1,0 +1,56 @@
+---
+import SectionLabel from './SectionLabel.astro';
+
+/*
+  The two-column shape the design gives the home page's "what we do" and "about"
+  sections: a label in a narrow left column, the section's content in a wide
+  right one, collapsing to a stack when there is no room for both.
+
+  The ratios are the whole of what these two sections share, so they are stated
+  here once; everything either one says lives in its slot.
+*/
+interface Props {
+  label: string;
+}
+
+const { label, ...rest } = Astro.props;
+---
+
+<section class="split column" {...rest}>
+  <SectionLabel>{label}</SectionLabel>
+  <div class="split-body" data-split-body><slot /></div>
+</section>
+
+<style>
+  .split {
+    max-width: 1100px;
+    padding-block: 0 100px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 48px;
+  }
+
+  /*
+    The label's own element, reached through `:global` because it belongs to a
+    child component: the column shape is this section's to decide, not its.
+  */
+  .split > :global([data-section-label]) {
+    flex: 1 1 160px;
+  }
+
+  .split-body {
+    flex: 3 1 420px;
+    /* Without this a long line inside the body refuses to let the row wrap. */
+    min-width: 0;
+  }
+
+  /*
+    Direct children only: the design sets both sections' own copy at this size,
+    and anything a slot nests deeper — the numbered steps — sets its own.
+  */
+  .split-body > :global(p) {
+    font-size: 18px;
+    line-height: 1.6;
+    max-width: 56ch;
+  }
+</style>

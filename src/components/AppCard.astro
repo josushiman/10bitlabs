@@ -3,9 +3,15 @@ import { linkOf, type App } from '../lib/apps';
 
 interface Props {
   app: App;
+  /*
+    One below the heading that opens the section the card sits in: the catalogue
+    puts these under its `h1`, the home page's featured section under its `h2`.
+  */
+  headingLevel?: 2 | 3;
 }
 
-const { app } = Astro.props;
+const { app, headingLevel = 2 } = Astro.props;
+const Name = `h${headingLevel}` as const;
 const { name, initials, description, platform, status, lang } = app.data;
 
 const link = linkOf(app);
@@ -23,7 +29,7 @@ const Card = link ? 'a' : 'div';
   <div class="badge" data-badge aria-hidden="true">{initials}</div>
 
   <div>
-    <h2 class="name" lang={lang}>{name}</h2>
+    <Name class="name" lang={lang}>{name}</Name>
     <p class="description" data-description>{description}</p>
   </div>
 
