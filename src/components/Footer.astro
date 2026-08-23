@@ -1,10 +1,23 @@
 ---
+import { COMPANY, MAILTO } from '../lib/company';
+
 const year = new Date().getFullYear();
 ---
 
 <footer class="footer">
   <div class="inner">
-    <div><span aria-hidden="true">// </span>© {year} 10 Bit Labs Ltd</div>
+    <div><span aria-hidden="true">// </span>© {year} {COMPANY.name}</div>
+
+    {/*
+      Privacy and the company disclosure live here rather than in the menu, as
+      the design has them: they are the two pages a visitor looks for at the
+      bottom of a site, not ones they navigate to.
+    */}
+    <nav class="links" aria-label="Legal">
+      <a href="/privacy/">Privacy</a>
+      <a href="/legal/">Company details</a>
+      <a href={MAILTO}>{COMPANY.email}</a>
+    </nav>
   </div>
 </footer>
 
@@ -27,5 +40,15 @@ const year = new Date().getFullYear();
     font-family: var(--font-mono);
     font-size: 12px;
     color: var(--textDim);
+  }
+
+  .links {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .links a:hover {
+    color: var(--text);
   }
 </style>

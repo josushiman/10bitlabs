@@ -135,7 +135,14 @@ const Card = link ? 'a' : 'div';
     padding: 4px 8px;
     /* The badge tile's radius, so the card carries two corner radii and not three. */
     border-radius: 14px;
-    color: var(--accent);
+    /*
+      The label is the site's text colour, not the accent: accent type on the
+      accent's own wash measures 3.9:1 in Paper, under the 4.5:1 this site holds
+      itself to. The wash and the edge still carry the accent — the badge tile's
+      own initials keep the accent type because they are decorative, and this
+      label is not.
+    */
+    color: var(--text);
     background: var(--accent-wash);
     border: 1px solid var(--accent-edge);
   }

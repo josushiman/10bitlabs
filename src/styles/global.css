@@ -55,6 +55,18 @@
   --label-tracking: 0.04em;
 }
 
+/*
+  Every page on the site is one centred column. The gutter and the centring are
+  the parts that must agree from page to page, so they are written once, here;
+  each page still declares the max-width and vertical rhythm the design records
+  for it, because those genuinely differ.
+*/
+.column {
+  margin-inline: auto;
+  padding-inline: 28px;
+  box-sizing: border-box;
+}
+
 /* Global resets carried over from the design. */
 body {
   margin: 0;

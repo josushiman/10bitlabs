@@ -9,9 +9,14 @@ import { expect, test } from '@playwright/test';
  */
 const ROUTES = [
   '/',
-  '/apps',
-  '/apps/_fixture-detailed-app',
-  '/apps/_fixture-live-app/privacy'
+  '/apps/',
+  '/about/',
+  '/contact/',
+  '/privacy/',
+  '/legal/',
+  '/no-such-page',
+  '/apps/_fixture-detailed-app/',
+  '/apps/_fixture-live-app/privacy/'
 ];
 
 for (const route of ROUTES) {

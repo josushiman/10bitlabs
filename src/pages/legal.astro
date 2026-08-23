@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import { COMPANY, MAILTO } from '../lib/company';
+
+/*
+  The Studio's disclosure of its registered particulars. The details are the real
+  ones on the register, and the page exists so that they are published somewhere
+  a visitor can find them — which is an obligation, not a nicety.
+*/
+---
+
+<BaseLayout
+  title="Company details — 10 Bit Labs"
+  description={`${COMPANY.name}, registered in England and Wales, company number ${COMPANY.number}.`}
+>
+  <section class="page column">
+    <SectionLabel>company</SectionLabel>
+    <h1>Company details.</h1>
+
+    <div class="details">
+      <div>{COMPANY.name}</div>
+      <div>{COMPANY.registration}</div>
+      <div>Company number: {COMPANY.number}</div>
+      <div>Registered address: {COMPANY.address}</div>
+      <div><a href={MAILTO}>{COMPANY.email}</a></div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: 680px;
+    padding-block: 100px 120px;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 600;
+    margin: 14px 0 28px;
+  }
+
+  .details {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 2;
+    color: var(--text);
+    overflow-wrap: anywhere;
+  }
+
+  .details a:hover {
+    color: var(--accent);
+  }
+</style>

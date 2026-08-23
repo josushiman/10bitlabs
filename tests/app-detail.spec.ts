@@ -30,7 +30,7 @@ test.describe('the App detail route', () => {
 
     const written = cardFor(page, 'Fixture Detailed App').getByRole('link');
     await expect(written).toHaveCount(1);
-    await expect(written).toHaveAttribute('href', '/apps/_fixture-detailed-app');
+    await expect(written).toHaveAttribute('href', '/apps/_fixture-detailed-app/');
     // An internal page is not somewhere else's tab.
     await expect(written).not.toHaveAttribute('target', '_blank');
 
@@ -48,7 +48,7 @@ test.describe('the App detail route', () => {
     // The precedence the rule implies: if the Studio has written about an App,
     // its own page is where a visitor is sent, listing or no listing.
     const link = cardFor(page, 'Fixture Launched App').getByRole('link');
-    await expect(link).toHaveAttribute('href', '/apps/_fixture-launched-app');
+    await expect(link).toHaveAttribute('href', '/apps/_fixture-launched-app/');
 
     // A launched App with nothing written still goes to its listing, as before.
     await expect(cardFor(page, 'Fixture Live App').getByRole('link')).toHaveAttribute(
@@ -65,7 +65,7 @@ test.describe('the App detail route', () => {
     await expect(page.getByText('In development')).toBeVisible();
 
     // A detail page is reached from the catalogue, so it has to lead back to it.
-    await expect(page.getByRole('link', { name: 'All apps' })).toHaveAttribute('href', '/apps');
+    await expect(page.getByRole('link', { name: 'All apps' })).toHaveAttribute('href', '/apps/');
   });
 
   test('the detail page leads onward only where there is somewhere to go', async ({ page }) => {
@@ -76,7 +76,7 @@ test.describe('the App detail route', () => {
     );
     await expect(page.getByRole('link', { name: /privacy policy/ })).toHaveAttribute(
       'href',
-      '/apps/_fixture-launched-app/privacy'
+      '/apps/_fixture-launched-app/privacy/'
     );
 
     // Neither a listing nor a policy, so neither link.

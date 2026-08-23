@@ -1,6 +1,7 @@
 ---
 import { render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import SectionLabel from '../../../components/SectionLabel.astro';
 import Prose from '../../../components/Prose.astro';
 import { listApps, listPrivacyPolicies, type App, type AppPrivacy } from '../../../lib/apps';
 
@@ -43,8 +44,8 @@ const updatedLabel = updated?.toLocaleDateString('en-GB', {
   title={`${app.data.name} privacy policy — 10 Bit Labs`}
   description={`How ${app.data.name} handles your data.`}
 >
-  <article class="page">
-    <div class="label"><span aria-hidden="true">// </span>privacy</div>
+  <article class="page column">
+    <SectionLabel class="label">privacy</SectionLabel>
     <h1 class:list={{ undated: !updated }}>
       <span lang={app.data.lang}>{app.data.name}</span> privacy policy
     </h1>
@@ -66,14 +67,10 @@ const updatedLabel = updated?.toLocaleDateString('en-GB', {
   /* The width and rhythm ticket 06's privacy and legal pages are cut to. */
   .page {
     max-width: 680px;
-    margin: 0 auto;
-    padding: 100px 28px 120px;
+    padding-block: 100px 120px;
   }
 
   .label {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--accent);
     margin-bottom: 14px;
   }
 

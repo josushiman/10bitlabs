@@ -51,7 +51,7 @@ export function hasDetail(app: App): boolean {
 
 /** The path of this App's detail page, if it has one. */
 export function detailPathOf(app: App): string | undefined {
-  return hasDetail(app) ? `/apps/${app.id}` : undefined;
+  return hasDetail(app) ? `/apps/${app.id}/` : undefined;
 }
 
 /**

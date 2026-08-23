@@ -190,10 +190,16 @@ test.describe('the app catalogue', () => {
     expect(tag.fontFamily).toContain('JetBrains Mono');
     // The label size already on the card, not a new one.
     expect(tag.fontSize).toBe(platform);
-    // The badge tile's exact treatment, not a second accent wash.
-    expect(tag.color).toBe(badge.color);
+    // The badge tile's wash and edge, not a second accent wash of its own.
     expect(tag.background).toBe(badge.background);
     expect(tag.border).toBe(badge.border);
+    /*
+      Where the tag parts company with the badge: the badge's initials are
+      decoration and keep the accent, while the tag is text a visitor has to read
+      and takes the readable colour. Accent on the accent's own wash measures
+      3.9:1 in Paper — see tests/contrast.spec.ts, which is what holds this.
+    */
+    expect(tag.color).not.toBe(badge.color);
   });
 
   test('marks the Turkish name as Turkish and renders its dotless i from the site font', async ({

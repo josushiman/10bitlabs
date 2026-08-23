@@ -1,0 +1,30 @@
+---
+/*
+  The `// something` label that opens every section on the site.
+
+  The slashes are the design's comment motif and carry no meaning, so they are
+  hidden from assistive technology rather than read out as punctuation before
+  every heading. That decision lives here, once, instead of in each page that
+  writes a label.
+
+  `--label-colour` lets a caller pick the design's dim variant — the hero uses it
+  — without a second component.
+*/
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<div class:list={['section-label', className]} data-section-label>
+  <span aria-hidden="true">// </span><slot />
+</div>
+
+<style>
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--label-colour, var(--accent));
+  }
+</style>

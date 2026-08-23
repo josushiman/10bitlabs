@@ -1,9 +1,10 @@
 ---
+import SectionLabel from './SectionLabel.astro';
 // The home page hero: the terminal window, the headline and the sub-paragraph.
 ---
 
 <section class="hero">
-  <div class="label"><span aria-hidden="true">// </span>uk software studio</div>
+  <SectionLabel class="label">uk software studio</SectionLabel>
 
   <div class="terminal">
     <div class="titlebar">
@@ -23,7 +24,7 @@
         made to be genuinely useful.
       </p>
 
-      <a class="cta" href="/apps">./explore-apps →</a>
+      <a class="cta" href="/apps/">./explore-apps →</a>
     </div>
   </div>
 </section>
@@ -35,10 +36,9 @@
     padding: 100px 28px 90px;
   }
 
+  /* The hero's label is the design's dim variant, not the accent one. */
   .label {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--textDim);
+    --label-colour: var(--textDim);
     margin-bottom: 18px;
   }
 

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionLabel from '../components/SectionLabel.astro';
 import AppCard from '../components/AppCard.astro';
 import { listApps } from '../lib/apps';
 
@@ -10,8 +11,8 @@ const apps = await listApps();
   title="Apps — 10 Bit Labs"
   description="The apps 10 Bit Labs is designing and building — every one of them still in development."
 >
-  <section class="intro">
-    <div class="label"><span aria-hidden="true">// </span>apps</div>
+  <section class="intro column">
+    <SectionLabel class="label">apps</SectionLabel>
     <h1>Things we're building.</h1>
     <p>
       A short and growing list of the apps 10 Bit Labs designs and builds itself. Every
@@ -19,7 +20,7 @@ const apps = await listApps();
     </p>
   </section>
 
-  <section class="catalogue">
+  <section class="catalogue column">
     <ul class="grid" data-app-grid>
       {
         apps.map((app) => (
@@ -35,14 +36,10 @@ const apps = await listApps();
 <style>
   .intro {
     max-width: 1100px;
-    margin: 0 auto;
-    padding: 80px 28px 40px;
+    padding-block: 80px 40px;
   }
 
   .label {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--accent);
     margin-bottom: 14px;
   }
 
@@ -62,8 +59,7 @@ const apps = await listApps();
 
   .catalogue {
     max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 28px 120px;
+    padding-block: 0 120px;
   }
 
   /*
