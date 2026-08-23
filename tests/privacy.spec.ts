@@ -1,7 +1,18 @@
 import { expect, test } from '@playwright/test';
 
-/** Every route the site serves today. Each one has to hold the line on its own. */
-const ROUTES = ['/', '/apps'];
+/**
+ * Every route the site serves today. Each one has to hold the line on its own.
+ *
+ * The two content-driven routes are fixture Apps, which is the only place they
+ * exist — see src/lib/apps.ts — but they are the same templates a real App would
+ * be served from.
+ */
+const ROUTES = [
+  '/',
+  '/apps',
+  '/apps/_fixture-detailed-app',
+  '/apps/_fixture-live-app/privacy'
+];
 
 for (const route of ROUTES) {
   test(`${route} makes zero third-party network requests`, async ({ page, baseURL }) => {

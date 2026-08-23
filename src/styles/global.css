@@ -42,6 +42,19 @@
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+/*
+  The accent-label vocabulary: a small wash, its edge, and the mono label type
+  they sit with. Named here rather than on the App card, which is where they were
+  written first — the detail page states the same two labels at page scale, and a
+  change to the accent has to reach both without being carried by hand.
+*/
+:root {
+  --accent-wash: color-mix(in srgb, var(--accent) 14%, transparent);
+  --accent-edge: color-mix(in srgb, var(--accent) 30%, transparent);
+  --label-size: 11px;
+  --label-tracking: 0.04em;
+}
+
 /* Global resets carried over from the design. */
 body {
   margin: 0;

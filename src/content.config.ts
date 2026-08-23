@@ -10,12 +10,14 @@ import { z } from 'astro/zod';
   that come next — the body becomes the App's detail page, and its absence is what
   stops an empty page ever being published.
 
-  The privacy body is deliberately not modelled yet. A markdown file has one body,
-  and an App needs two long-form ones; deciding where the second lives belongs to
-  ticket 05, which is what actually serves it. See that ticket's notes.
+  An App needs two long-form bodies and a markdown file has one, so the privacy
+  policy is a sibling file: `<slug>.privacy.md` beside `<slug>.md`. Writing that
+  file is the whole of what publishes an App's privacy route, and deleting it is
+  the whole of what withdraws it.
 */
 const apps = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/apps' }),
+  // The sibling privacy files are their own collection; they are not Apps.
+  loader: glob({ pattern: ['**/*.md', '!**/*.privacy.md'], base: './src/content/apps' }),
   schema: z.object({
     name: z.string(),
     /** Two or three characters for the badge tile. */
@@ -40,4 +42,26 @@ const apps = defineCollection({
   })
 });
 
-export const collections = { apps };
+/*
+  The long-form privacy policy for one App — the page an app store listing links
+  to. Keyed by the App's slug, because `generateId` drops the `.privacy` from the
+  filename: an entry here and the App it belongs to share an id.
+*/
+const appPrivacy = defineCollection({
+  loader: glob({
+    pattern: '**/*.privacy.md',
+    base: './src/content/apps',
+    generateId: ({ entry }) => entry.replace(/\.privacy\.md$/, '')
+  }),
+  schema: z.object({
+    /*
+      When the policy last changed, shown on the page — a policy a visitor cannot
+      date is worth less than one they can. Optional, and deliberately so: a
+      required field here would mean writing the body was not sufficient to
+      publish the route, which is the one promise these routes are built on.
+    */
+    updated: z.coerce.date().optional()
+  })
+});
+
+export const collections = { apps, appPrivacy };

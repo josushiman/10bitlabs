@@ -1,0 +1,166 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Prose from '../../../components/Prose.astro';
+import { hasDetail, listApps, listPrivacyPolicies, type App } from '../../../lib/apps';
+
+/*
+  The route materialises from the content: only an App with a body gets a path,
+  so an App with nothing written about it has no detail page to reach, and the
+  site's own 404 answers for it. Promoting an App to a page of its own is
+  therefore writing that body — never plumbing.
+*/
+export async function getStaticPaths() {
+  const apps = await listApps();
+  const policies = await listPrivacyPolicies();
+  return apps.filter(hasDetail).map((app) => ({
+    params: { slug: app.id },
+    // The policy's path, and only if there is a policy: the page must not offer
+    // a link to a route that does not exist, which is the same rule the card
+    // follows on the catalogue.
+    props: { app, privacyPath: policies.has(app.id) ? `/apps/${app.id}/privacy` : undefined }
+  }));
+}
+
+interface Props {
+  app: App;
+  privacyPath?: string;
+}
+
+const { app, privacyPath } = Astro.props;
+const { name, description, platform, status, url, lang } = app.data;
+const { Content } = await render(app);
+---
+
+<BaseLayout title={`${name} — 10 Bit Labs`} description={description}>
+  <article class="page">
+    <a class="back" href="/apps"><span aria-hidden="true">← </span>All apps</a>
+
+    <div class="label"><span aria-hidden="true">// </span>app</div>
+    <h1 lang={lang}>{name}</h1>
+    <p class="standfirst">{description}</p>
+
+    <div class="facts">
+      <span class="platform" data-platform>{platform}</span>
+      {status === 'in-development' && <span class="tag">In development</span>}
+    </div>
+
+    <Prose>
+      <Content />
+    </Prose>
+
+    <div class="onward">
+      {
+        /* A live App's store listing, and only a live one: the same rule the card
+           applies to itself, so a page cannot offer a link the catalogue would not. */
+        status === 'live' && url && (
+          <a class="command" href={url} target="_blank" rel="noopener">
+            <span aria-hidden="true">$ </span>open {name}
+          </a>
+        )
+      }
+      {
+        privacyPath && (
+          <a class="command" href={privacyPath}>
+            <span aria-hidden="true">$ </span>read the privacy policy
+          </a>
+        )
+      }
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  /* About's measure: long-form copy with a heading above it. */
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 80px 28px 100px;
+  }
+
+  .back {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--textDim);
+    margin-bottom: 28px;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    font-weight: 600;
+    margin: 0 0 20px;
+  }
+
+  .standfirst {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--textDim);
+    max-width: 56ch;
+    margin: 0 0 20px;
+  }
+
+  /*
+    The card's own foot, restated at page scale: the same two labels a visitor
+    just read on the catalogue, so arriving here is continuous with leaving there.
+  */
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    margin-bottom: 40px;
+  }
+
+  .platform,
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  .platform {
+    color: var(--textDim);
+  }
+
+  .tag {
+    padding: 4px 8px;
+    border-radius: 14px;
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  /* Empty when an App has neither a listing nor a policy, and then it takes no room. */
+  .onward {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+  }
+
+  .onward:not(:empty) {
+    margin-top: 40px;
+  }
+
+  .command {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .command:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>
