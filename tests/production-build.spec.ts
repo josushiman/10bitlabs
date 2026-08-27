@@ -8,7 +8,7 @@ import { sitemapUrls } from './support';
   Every other test in this suite runs against the build the fixtures are admitted
   into, because that is the only build in which a written App exists at all. This
   one runs against the build the public gets: no fixtures, and nothing written
-  about any of the three real Apps.
+  about any of the four real Apps.
 
   It is the guard on the promise the routes are built around — that a page cannot
   be published by accident. A filter that stopped filtering, or a placeholder body

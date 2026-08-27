@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { cardFor, expectLegibleAtEitherEnd } from './support';
 
-/** The three seed entries, in the order the content files ask for. */
+/** The four seed entries, in the order the content files ask for. */
 const SEED = [
   {
     name: 'Plan The Day',
@@ -20,6 +20,12 @@ const SEED = [
     initials: 'FI',
     platform: 'iOS',
     description: 'Turkish vocabulary and verb conjugation, practised in short sessions.'
+  },
+  {
+    name: 'Pick My Lift',
+    initials: 'PML',
+    platform: 'iOS',
+    description: 'A curated exercise picker, matched to the equipment you have available.'
   }
 ];
 
@@ -46,6 +52,7 @@ test.describe('the app catalogue', () => {
     for (const app of SEED) expect(headings).toContain(app.name);
     expect(headings.indexOf('Plan The Day')).toBeLessThan(headings.indexOf('Sıra'));
     expect(headings.indexOf('Sıra')).toBeLessThan(headings.indexOf('Fiilo'));
+    expect(headings.indexOf('Fiilo')).toBeLessThan(headings.indexOf('Pick My Lift'));
   });
 
   test('renders an in-development entry unlinked and tagged', async ({ page }) => {

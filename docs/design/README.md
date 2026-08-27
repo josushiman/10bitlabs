@@ -44,7 +44,7 @@ Read this before treating the design as literal truth:
 - **Theme** follows `prefers-color-scheme` and persists an override; the design
   hard-defaults to Crimson and persists nothing.
 - **The app list is placeholder** — Tally, Driftnote and Fieldkit are not real
-  products. The real seed apps are Plan The Day, Sıra and Fiilo.
+  products. The real seed apps are Plan The Day, Sıra, Fiilo and Pick My Lift.
 - **Copy claiming the apps have shipped** ("A few things we've shipped", "Things
   we've built.") is false for a studio whose apps are all in development.
 - **App privacy policies** live on this site as generated routes, not "hosted where

@@ -23,9 +23,15 @@ test.describe('the per-App privacy route', () => {
   });
 
   test('an App with no privacy body has no privacy route', async ({ page }) => {
-    // The three real Apps, and a fourth that has a detail page but no policy —
+    // The four real Apps, and a fifth that has a detail page but no policy —
     // the two routes are written separately and appear separately.
-    for (const slug of ['plan-the-day', 'sira', 'fiilo', '_fixture-detailed-app']) {
+    for (const slug of [
+      'plan-the-day',
+      'sira',
+      'fiilo',
+      'pick-my-lift',
+      '_fixture-detailed-app'
+    ]) {
       const response = await page.goto(`/apps/${slug}/privacy`);
       expect(response?.status(), `/apps/${slug}/privacy should not exist`).toBe(404);
     }
