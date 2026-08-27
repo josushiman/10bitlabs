@@ -70,12 +70,104 @@ test.describe('the robots file', () => {
     const body = await response.text();
     expect(body).toContain('User-agent: *');
     expect(body).toContain('Allow: /');
-    expect(body).not.toContain('Disallow: /\n');
+    for (const agent of [
+      'GPTBot',
+      'ClaudeBot',
+      'Google-Extended',
+      'Applebot-Extended',
+      'Amazonbot',
+      'CCBot'
+    ]) {
+      expect(body).toContain(`User-agent: ${agent}\nDisallow: /`);
+    }
+
+    // The generic policy serves ordinary search and user-requested retrieval.
+    for (const agent of [
+      'Googlebot',
+      'bingbot',
+      'OAI-SearchBot',
+      'ChatGPT-User',
+      'Claude-SearchBot',
+      'Claude-User',
+      'Applebot',
+      'Amzn-SearchBot',
+      'Amzn-User',
+      'PerplexityBot',
+      'Perplexity-User'
+    ]) {
+      expect(body).not.toContain(`User-agent: ${agent}\nDisallow: /`);
+    }
   });
 
   test('points at the sitemap on the canonical hostname', async ({ request }) => {
     const body = await (await request.get('/robots.txt')).text();
     expect(body).toContain(`Sitemap: ${APEX}/sitemap.xml`);
+  });
+});
+
+function structuredData(page: import('@playwright/test').Page) {
+  return page.locator('script[type="application/ld+json"]').evaluateAll((scripts) =>
+    scripts.map((script) => JSON.parse(script.textContent ?? ''))
+  );
+}
+
+test.describe('structured identity', () => {
+  test('the canonical home page connects the Website and Studio', async ({ page }) => {
+    await page.goto('/');
+    const [graph] = await structuredData(page);
+
+    expect(graph['@context']).toBe('https://schema.org');
+    expect(graph['@graph']).toEqual(
+      expect.arrayContaining([
+        {
+          '@type': 'WebSite',
+          '@id': `${APEX}/#website`,
+          name: '10 Bit Labs',
+          url: `${APEX}/`,
+          publisher: { '@id': `${APEX}/#organization` }
+        },
+        {
+          '@type': 'Organization',
+          '@id': `${APEX}/#organization`,
+          name: '10 Bit Labs',
+          legalName: '10 Bit Labs Ltd',
+          url: `${APEX}/`,
+          logo: `${APEX}/favicon.svg`,
+          email: 'hello@10bitlabs.co.uk'
+        }
+      ])
+    );
+    expect(JSON.stringify(graph)).not.toContain('17378712');
+    expect(JSON.stringify(graph)).not.toContain('Dunmow Close');
+  });
+
+  test('each materialised App page describes only its visible facts', async ({ page }) => {
+    await page.goto('/apps/_fixture-detailed-app/');
+    const [app] = await structuredData(page);
+
+    expect(app).toEqual({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      '@id': `${APEX}/apps/_fixture-detailed-app/#softwareapplication`,
+      name: 'Fixture Detailed App',
+      description: 'An App with something written about it, so the detail route has something to be.',
+      operatingSystem: 'Test',
+      url: `${APEX}/apps/_fixture-detailed-app/`,
+      publisher: { '@id': `${APEX}/#organization` }
+    });
+  });
+
+  test('a listed App is named as the external listing only when one is visible', async ({ page }) => {
+    await page.goto('/apps/_fixture-launched-app/');
+    const [app] = await structuredData(page);
+
+    expect(app.sameAs).toBe('https://example.com/fixture-launched-app');
+  });
+
+  test('an App without a materialised route has no structured data', async ({ page }) => {
+    const response = await page.goto('/apps/plan-the-day/');
+    expect(response?.status()).toBe(404);
+    await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(0);
   });
 });
 

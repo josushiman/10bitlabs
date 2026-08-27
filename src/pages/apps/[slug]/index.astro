@@ -4,6 +4,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import SectionLabel from '../../../components/SectionLabel.astro';
 import Prose from '../../../components/Prose.astro';
 import { hasDetail, listApps, listPrivacyPolicies, type App } from '../../../lib/apps';
+import { appStructuredData } from '../../../lib/structured-data';
 
 /*
   The route materialises from the content: only an App with a body gets a path,
@@ -31,9 +32,14 @@ interface Props {
 const { app, privacyPath } = Astro.props;
 const { name, description, platform, status, url, lang } = app.data;
 const { Content } = await render(app);
+const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
-<BaseLayout title={`${name} — 10 Bit Labs`} description={description}>
+<BaseLayout
+  title={`${name} — 10 Bit Labs`}
+  description={description}
+  structuredData={appStructuredData(app, canonical, Astro.site!)}
+>
   <article class="page column">
     <a class="back" href="/apps/"><span aria-hidden="true">← </span>All apps</a>
 

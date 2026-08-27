@@ -12,7 +12,8 @@ test('the served response carries the security headers', async ({ request }) => 
 });
 
 test('the content security policy is strict and admits the theme script by hash', async ({
-  request
+  request,
+  page
 }) => {
   const csp = (await request.get('/')).headers()['content-security-policy'];
 
@@ -25,6 +26,14 @@ test('the content security policy is strict and admits the theme script by hash'
   expect(csp).not.toContain('unsafe-inline');
   expect(csp).not.toContain('unsafe-eval');
   expect(csp).not.toContain('*');
+
+  for (const route of ['/', '/apps/_fixture-detailed-app/']) {
+    await page.goto(route);
+    expect(await page.locator('script:not([src])').count()).toBeGreaterThan(1);
+    expect(
+      await page.locator('script:not([src]):not([type="application/ld+json"])').count()
+    ).toBe(1);
+  }
 });
 
 test('a hostname that is not the apex is non-indexable', async ({ request }) => {
