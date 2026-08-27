@@ -3,7 +3,7 @@ import { cardFor, expectLegibleAtEitherEnd } from './support';
 
 /*
   Routes materialise from content: an App gets a detail page when, and only when,
-  something has been written about it. The three real Apps have nothing written,
+  something has been written about it. The four real Apps have nothing written,
   so the branches that do exist are proved by fixture Apps admitted into the test
   build alone — see src/lib/apps.ts.
 */
@@ -18,8 +18,8 @@ test.describe('the App detail route', () => {
   });
 
   test('an App with no body has no detail route', async ({ page }) => {
-    // All three real Apps are in this state, and none of them may have a page.
-    for (const slug of ['plan-the-day', 'sira', 'fiilo']) {
+    // All four real Apps are in this state, and none of them may have a page.
+    for (const slug of ['plan-the-day', 'sira', 'fiilo', 'pick-my-lift']) {
       const response = await page.goto(`/apps/${slug}`);
       expect(response?.status(), `/apps/${slug} should not exist`).toBe(404);
     }
@@ -35,7 +35,7 @@ test.describe('the App detail route', () => {
     await expect(written).not.toHaveAttribute('target', '_blank');
 
     // Nothing written, so nothing to link to — whatever the App's status.
-    for (const name of ['Plan The Day', 'Sıra', 'Fiilo']) {
+    for (const name of ['Plan The Day', 'Sıra', 'Fiilo', 'Pick My Lift']) {
       await expect(cardFor(page, name).getByRole('link')).toHaveCount(0);
     }
   });

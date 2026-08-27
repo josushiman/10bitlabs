@@ -46,11 +46,11 @@ test.describe('the sitemap', () => {
     expect(paths).toContain('/apps/_fixture-live-app/privacy/');
 
     /*
-      The three real Apps have a card on the catalogue and nothing else. Naming
+      The four real Apps have a card on the catalogue and nothing else. Naming
       a route for them would send a crawler at the 404 page, which is exactly the
       failure the conditional routes were built to avoid.
     */
-    for (const slug of ['sira', 'fiilo', 'plan-the-day']) {
+    for (const slug of ['sira', 'fiilo', 'plan-the-day', 'pick-my-lift']) {
       expect(paths.some((path) => path.startsWith(`/apps/${slug}/`))).toBe(false);
     }
   });

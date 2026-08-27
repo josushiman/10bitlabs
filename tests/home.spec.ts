@@ -126,7 +126,7 @@ test.describe('the home page', () => {
   }) => {
     await page.goto('/');
 
-    for (const name of ['Plan The Day', 'Sıra', 'Fiilo']) {
+    for (const name of ['Plan The Day', 'Sıra', 'Fiilo', 'Pick My Lift']) {
       const card = cardFor(page, name);
       await expect(card.getByText('In development')).toBeVisible();
       await expect(card.getByRole('link')).toHaveCount(0);

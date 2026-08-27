@@ -4,7 +4,7 @@ export type App = CollectionEntry<'apps'>;
 export type AppPrivacy = CollectionEntry<'appPrivacy'>;
 
 /*
-  Underscore-prefixed entries are test fixtures. All three real Apps are in
+  Underscore-prefixed entries are test fixtures. All four real Apps are in
   development, so the linked-card branch has nothing real to render; rather than
   leave it untested or ship a fake App, the fixture is admitted only when the
   test harness asks for it. See playwright.config.ts.
