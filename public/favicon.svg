@@ -2,7 +2,7 @@
   <!--
     The app icon from docs/design/10 Bit Labs Icon.dc.html: a filled "1" beside an
     outlined "0", in the dark palette. Colours are the hex equivalents of the
-    oklch tokens in src/styles/global.css (--bg, dark --accent) so the file needs
+    oklch background and dark accent tokens in src/styles/global.css so the file needs
     no colour-space support to render. The mark is scaled up against the 1024
     canvas relative to the app icon: at 16px the icon's generous padding leaves
     the bars too thin to read.
