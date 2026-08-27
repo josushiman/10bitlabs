@@ -3,13 +3,15 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import PageTransitions from '../components/PageTransitions.astro';
+import { jsonLd } from '../lib/structured-data';
 
 interface Props {
   title: string;
   description: string;
+  structuredData?: object;
 }
 
-const { title, description } = Astro.props;
+const { title, description, structuredData } = Astro.props;
 
 /*
   Absolute URLs, because a card reader has no page to resolve a relative one
@@ -49,6 +51,12 @@ const cardImage = new URL('/og.png', Astro.site);
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="The 10 Bit Labs mark: a one and a zero." />
     <meta name="twitter:card" content="summary_large_image" />
+
+    {
+      structuredData && (
+        <script is:inline type="application/ld+json" set:html={jsonLd(structuredData)} />
+      )
+    }
 
     {/*
       The SVG is the one browsers should pick; the ICO is only there for the ones

@@ -63,6 +63,15 @@ test.describe('the build the public gets', () => {
     }
   });
 
+  test('ships no App structured data without an App detail page', async () => {
+    for (const file of await filesUnder(OUT)) {
+      if (!file.endsWith('.html')) continue;
+      expect(await readFile(file, 'utf8'), `${file} describes an unpublished App`).not.toContain(
+        'SoftwareApplication'
+      );
+    }
+  });
+
   /*
     The sitemap is the one published file that names routes rather than rendering
     them, so a fixture could reach a crawler through it without appearing on any

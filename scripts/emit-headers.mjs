@@ -28,16 +28,30 @@ async function htmlFiles(dir) {
 const hashes = new Set();
 for (const file of await htmlFiles(DIST)) {
   const html = await readFile(file, 'utf8');
+  let executableInlineScriptCount = 0;
   for (const [, attrs, body] of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
     if (/\ssrc=/.test(attrs)) continue;
+    // JSON-LD is structured data, not executable JavaScript. It must remain
+    // outside script-src so adding a fact to it cannot silently widen the CSP.
+    if (/\stype=(?:"application\/ld\+json"|'application\/ld\+json'|application\/ld\+json)(?:\s|$)/i.test(attrs)) {
+      continue;
+    }
+    executableInlineScriptCount++;
     hashes.add(`'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`);
+  }
+  if (executableInlineScriptCount === 0) {
+    throw new Error(`No executable inline script found in ${file} — the theme script should be there.`);
+  }
+  if (executableInlineScriptCount !== 1) {
+    throw new Error(
+      `Expected exactly one executable inline script in ${file}, found ${executableInlineScriptCount}. The theme script is meant to be the only one.`
+    );
   }
 }
 
-if (hashes.size === 0) throw new Error('No inline script found — the theme script should be there.');
-if (hashes.size > 1) {
+if (hashes.size !== 1) {
   throw new Error(
-    `Expected exactly one inline script, found ${hashes.size}. The theme script is meant to be the only one.`
+    `Expected the same theme script on every page, found ${hashes.size} executable inline script hashes.`
   );
 }
 

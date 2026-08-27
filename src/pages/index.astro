@@ -5,11 +5,13 @@ import FeaturedApps from '../components/FeaturedApps.astro';
 import WhatWeDo from '../components/WhatWeDo.astro';
 import AboutTeaser from '../components/AboutTeaser.astro';
 import ContactCta from '../components/ContactCta.astro';
+import { homeStructuredData } from '../lib/structured-data';
 ---
 
 <BaseLayout
   title="10 Bit Labs — UK software studio"
   description="10 Bit Labs designs, builds and publishes its own apps — small, focused tools made to be genuinely useful."
+  structuredData={homeStructuredData(Astro.site!)}
 >
   <Hero />
   <FeaturedApps />
