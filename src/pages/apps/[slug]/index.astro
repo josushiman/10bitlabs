@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import AppMark from '../../../components/AppMark.astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import AppFeatures from '../../../components/AppFeatures.astro';
 import AppGallery from '../../../components/AppGallery.astro';
@@ -54,7 +55,7 @@ interface Props {
 }
 
 const { app, privacyPath, termsPath, support, supportPath } = Astro.props;
-const { name, initials, description, platform, status, url, lang } = app.data;
+const { name, icon, initials, description, platform, status, url, lang } = app.data;
 const { Content } = await render(app);
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const statusLabel = statusLabelOf(app);
@@ -70,7 +71,7 @@ const screenshots = screenshotsFor(app.id);
     <a class="back" href="/apps/">All apps</a>
 
     <header class="hero">
-      <div class="app-mark" data-badge aria-hidden="true">{initials}</div>
+      <AppMark class="app-mark" icon={icon} initials={initials} width={116} height={116} />
       <div class="hero-copy">
         {/* The other half of the card's shared heading — see AppCard.astro. */}
         <h1 lang={lang} data-app-title={app.id}>{name}</h1>
@@ -171,7 +172,7 @@ const screenshots = screenshotsFor(app.id);
     border-bottom: 1px solid color-mix(in srgb, var(--border) 52%, transparent);
   }
 
-  .app-mark {
+  :global(.app-mark) {
     aspect-ratio: 1;
     display: grid;
     place-items: center;
@@ -182,6 +183,11 @@ const screenshots = screenshotsFor(app.id);
     color: var(--accent);
     background: var(--accent-wash);
     border: 1px solid var(--accent-edge);
+  }
+
+  :global(.app-mark.has-icon) {
+    background: none;
+    border: 0;
   }
 
   h1 {
@@ -279,7 +285,7 @@ const screenshots = screenshotsFor(app.id);
       margin-bottom: 42px;
     }
 
-    .app-mark {
+    :global(.app-mark) {
       border-radius: 14px;
       font-size: 15px;
     }

@@ -30,7 +30,7 @@ const SEED = [
 ];
 
 test.describe('the app catalogue', () => {
-  test('lists every seed entry with its name, description, platform and initials', async ({
+  test('lists every seed entry with its name, description, platform and visual mark', async ({
     page
   }) => {
     const response = await page.goto('/apps');
@@ -41,7 +41,14 @@ test.describe('the app catalogue', () => {
       await expect(card).toHaveCount(1);
       await expect(card.getByText(app.description)).toBeVisible();
       await expect(card.getByText(app.platform, { exact: true })).toBeVisible();
-      await expect(card.getByText(app.initials, { exact: true })).toBeVisible();
+
+      if (app.name === 'Sıra') {
+        await expect(card.locator('[data-badge] .sira-icon')).toBeVisible();
+        await expect(card.locator('[data-badge] img')).toHaveCount(0);
+        await expect(card.getByText(app.initials, { exact: true })).toHaveCount(0);
+      } else {
+        await expect(card.getByText(app.initials, { exact: true })).toBeVisible();
+      }
     }
   });
 
