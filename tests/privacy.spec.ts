@@ -15,6 +15,8 @@ const ROUTES = [
   '/privacy/',
   '/legal/',
   '/no-such-page',
+  '/apps/sira/',
+  '/apps/sira/support/',
   '/apps/_fixture-detailed-app/',
   '/apps/_fixture-live-app/privacy/'
 ];

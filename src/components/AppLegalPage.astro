@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Prose from './Prose.astro';
+import { hasDetail, type App } from '../lib/apps';
+
+interface Props {
+  app: App;
+  kind: 'privacy' | 'terms';
+  updated?: Date;
+}
+
+const { app, kind, updated } = Astro.props;
+const documentName = kind === 'privacy' ? 'privacy policy' : 'terms of service';
+const description =
+  kind === 'privacy'
+    ? `How ${app.data.name} handles your data.`
+    : `The terms that apply when you use ${app.data.name}.`;
+const updatedLabel = updated?.toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC'
+});
+const backPath = hasDetail(app) ? `/apps/${app.id}/` : '/apps/';
+const backLabel = hasDetail(app) ? `Back to ${app.data.name}` : 'All apps';
+---
+
+<BaseLayout title={`${app.data.name} ${documentName} — 10 Bit Labs`} description={description}>
+  <article class="page column">
+    <a class="back" href={backPath}>{backLabel}</a>
+    <h1 class:list={{ undated: !updated }}>
+      <span lang={app.data.lang}>{app.data.name}</span> {documentName}
+    </h1>
+    {
+      updated && (
+        <p class="updated">
+          Last updated <time datetime={updated.toISOString().slice(0, 10)}>{updatedLabel}</time>
+        </p>
+      )
+    }
+
+    <Prose>
+      <slot />
+    </Prose>
+  </article>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: 680px;
+    padding-block: 84px 120px;
+  }
+
+  .back {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--textDim);
+    margin-bottom: 42px;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    font-weight: 600;
+    text-wrap: balance;
+    margin: 0 0 12px;
+  }
+
+  .updated {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--textDim);
+    margin: 0 0 32px;
+  }
+
+  h1.undated {
+    margin-bottom: 32px;
+  }
+</style>

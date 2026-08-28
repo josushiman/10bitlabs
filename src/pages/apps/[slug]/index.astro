@@ -1,9 +1,22 @@
 ---
 import { render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import SectionLabel from '../../../components/SectionLabel.astro';
+import AppFeatures from '../../../components/AppFeatures.astro';
+import AppGallery from '../../../components/AppGallery.astro';
+import AppPricing from '../../../components/AppPricing.astro';
+import AppSupportSummary from '../../../components/AppSupportSummary.astro';
 import Prose from '../../../components/Prose.astro';
-import { hasDetail, listApps, listPrivacyPolicies, type App } from '../../../lib/apps';
+import { screenshotsFor } from '../../../lib/app-screenshots';
+import {
+  hasDetail,
+  listApps,
+  listPrivacyPolicies,
+  listSupportGuides,
+  listTerms,
+  statusLabelOf,
+  type App,
+  type AppSupport
+} from '../../../lib/apps';
 import { appStructuredData } from '../../../lib/structured-data';
 
 /*
@@ -14,25 +27,38 @@ import { appStructuredData } from '../../../lib/structured-data';
 */
 export async function getStaticPaths() {
   const apps = await listApps();
-  const policies = await listPrivacyPolicies();
+  const [policies, terms, support] = await Promise.all([
+    listPrivacyPolicies(),
+    listTerms(),
+    listSupportGuides()
+  ]);
   return apps.filter(hasDetail).map((app) => ({
     params: { slug: app.id },
-    // The policy's path, and only if there is a policy: the page must not offer
-    // a link to a route that does not exist, which is the same rule the card
-    // follows on the catalogue.
-    props: { app, privacyPath: policies.has(app.id) ? `/apps/${app.id}/privacy/` : undefined }
+    // Legal links exist only alongside the documents that publish their routes.
+    props: {
+      app,
+      privacyPath: policies.has(app.id) ? `/apps/${app.id}/privacy/` : undefined,
+      termsPath: terms.has(app.id) ? `/apps/${app.id}/terms/` : undefined,
+      support: support.get(app.id),
+      supportPath: support.has(app.id) ? `/apps/${app.id}/support/` : undefined
+    }
   }));
 }
 
 interface Props {
   app: App;
   privacyPath?: string;
+  termsPath?: string;
+  support?: AppSupport;
+  supportPath?: string;
 }
 
-const { app, privacyPath } = Astro.props;
-const { name, description, platform, status, url, lang } = app.data;
+const { app, privacyPath, termsPath, support, supportPath } = Astro.props;
+const { name, initials, description, platform, status, url, lang } = app.data;
 const { Content } = await render(app);
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const statusLabel = statusLabelOf(app);
+const screenshots = screenshotsFor(app.id);
 ---
 
 <BaseLayout
@@ -41,23 +67,55 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   structuredData={appStructuredData(app, canonical, Astro.site!)}
 >
   <article class="page column">
-    <a class="back" href="/apps/"><span aria-hidden="true">← </span>All apps</a>
+    <a class="back" href="/apps/">All apps</a>
 
-    <SectionLabel spaceBelow={14}>app</SectionLabel>
-    {/* The other half of the card's shared heading — see AppCard.astro. */}
-    <h1 lang={lang} data-app-title={app.id}>{name}</h1>
-    <p class="standfirst">{description}</p>
+    <header class="hero">
+      <div class="app-mark" data-badge aria-hidden="true">{initials}</div>
+      <div class="hero-copy">
+        {/* The other half of the card's shared heading — see AppCard.astro. */}
+        <h1 lang={lang} data-app-title={app.id}>{name}</h1>
+        <p class="standfirst">{description}</p>
 
-    <div class="facts">
-      <span class="platform" data-platform>{platform}</span>
-      {status === 'in-development' && <span class="tag">In development</span>}
-    </div>
+        <div class="facts">
+          <span class="platform" data-platform>{platform}</span>
+          {statusLabel && <span class="tag">{statusLabel}</span>}
+        </div>
+      </div>
+    </header>
 
-    <Prose>
-      <Content />
-    </Prose>
+    <section class="story" aria-label={`About ${name}`}>
+      <Prose>
+        <Content />
+      </Prose>
+    </section>
 
-    <div class="onward">
+    {app.data.features && <AppFeatures appName={name} features={app.data.features} />}
+
+    <AppGallery appName={name} screenshots={screenshots} />
+
+    {
+      app.data.purchase && (
+        <AppPricing
+          purchase={app.data.purchase}
+          privacyPath={privacyPath}
+          termsPath={termsPath}
+        />
+      )
+    }
+
+    {
+      support && supportPath && (
+        <AppSupportSummary
+          appName={name}
+          email={support.data.email}
+          responseTime={support.data.responseTime}
+          summary={support.data.summary}
+          supportPath={supportPath}
+        />
+      )
+    }
+
+    <nav class="onward" aria-label={`${name} links`}>
       {
         /* A live App's store listing, and only a live one: the same rule the card
            applies to itself, so a page cannot offer a link the catalogue would not. */
@@ -68,20 +126,26 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         )
       }
       {
-        privacyPath && (
+        !app.data.purchase && privacyPath && (
           <a class="command" href={privacyPath}>
             <span aria-hidden="true">$ </span>read the privacy policy
           </a>
         )
       }
-    </div>
+      {
+        !app.data.purchase && termsPath && (
+          <a class="command" href={termsPath}>
+            <span aria-hidden="true">$ </span>read the terms of service
+          </a>
+        )
+      }
+    </nav>
   </article>
 </BaseLayout>
 
 <style>
-  /* About's measure: long-form copy with a heading above it. */
   .page {
-    max-width: 760px;
+    max-width: 980px;
     padding-block: 80px 100px;
   }
 
@@ -90,25 +154,50 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     font-family: var(--font-mono);
     font-size: 13px;
     color: var(--textDim);
-    margin-bottom: 28px;
+    margin-bottom: 48px;
   }
 
   .back:hover {
     color: var(--accent);
   }
 
-  h1 {
-    font-size: clamp(2rem, 4.5vw, 3rem);
+  .hero {
+    display: grid;
+    grid-template-columns: 116px minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(26px, 5vw, 54px);
+    padding-bottom: 54px;
+    margin-bottom: 54px;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 52%, transparent);
+  }
+
+  .app-mark {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 16px;
+    font-family: var(--font-mono);
+    font-size: 22px;
     font-weight: 600;
-    margin: 0 0 20px;
+    color: var(--accent);
+    background: var(--accent-wash);
+    border: 1px solid var(--accent-edge);
+  }
+
+  h1 {
+    font-size: clamp(2.7rem, 7vw, 5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    margin: 0 0 24px;
   }
 
   .standfirst {
     font-size: 17px;
     line-height: 1.6;
     color: var(--textDim);
-    max-width: 56ch;
-    margin: 0 0 20px;
+    max-width: 58ch;
+    margin: 0 0 24px;
   }
 
   /*
@@ -120,7 +209,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     flex-wrap: wrap;
     align-items: center;
     gap: 8px 12px;
-    margin-bottom: 40px;
   }
 
   .platform,
@@ -143,15 +231,25 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     border: 1px solid var(--accent-edge);
   }
 
-  /* Empty when an App has neither a listing nor a policy, and then it takes no room. */
+  .story {
+    max-width: 720px;
+  }
+
+  /* Empty when an App has neither a listing nor a legal document. */
   .onward {
     display: flex;
     flex-wrap: wrap;
     gap: 12px 28px;
+    padding-top: 26px;
+    border-top: 1px solid color-mix(in srgb, var(--border) 52%, transparent);
   }
 
   .onward:not(:empty) {
-    margin-top: 40px;
+    margin-top: 72px;
+  }
+
+  .onward:empty {
+    display: none;
   }
 
   .command {
@@ -163,5 +261,36 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   .command:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+
+  @media (max-width: 600px) {
+    .page {
+      padding-block: 56px 88px;
+    }
+
+    .back {
+      margin-bottom: 36px;
+    }
+
+    .hero {
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 20px;
+      padding-bottom: 42px;
+      margin-bottom: 42px;
+    }
+
+    .app-mark {
+      border-radius: 14px;
+      font-size: 15px;
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 15vw, 4rem);
+      margin-bottom: 18px;
+    }
+
+    .standfirst {
+      font-size: 16px;
+    }
   }
 </style>

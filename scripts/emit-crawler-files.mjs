@@ -2,8 +2,8 @@
 //
 // Both are derived from the build rather than maintained by hand, and for the
 // same reason: the route set is conditional. An App's detail page exists only
-// once someone has written a body for it, and its privacy route only once there
-// is a policy — so a hand-kept sitemap would name routes that 404 the moment an
+// once someone has written a body for it, and each legal route only once there
+// is a document — so a hand-kept sitemap would name routes that 404 the moment an
 // App is added to the catalogue before anything is written about it, which is
 // the ordinary state of every App on this site today.
 //

@@ -41,16 +41,22 @@ test.describe('the sitemap', () => {
   test('lists the App routes that exist and no others', async ({ request }) => {
     const paths = await sitemapPaths(request);
 
-    // The fixture Apps are the only ones with a body or a policy in this build.
+    // Sıra has real detail, legal, and support pages; fixtures exercise the
+    // remaining route states.
+    expect(paths).toContain('/apps/sira/');
+    expect(paths).toContain('/apps/sira/privacy/');
+    expect(paths).toContain('/apps/sira/support/');
+    expect(paths).toContain('/apps/sira/terms/');
     expect(paths).toContain('/apps/_fixture-detailed-app/');
     expect(paths).toContain('/apps/_fixture-live-app/privacy/');
+    expect(paths).toContain('/apps/_fixture-launched-app/terms/');
 
     /*
-      The four real Apps have a card on the catalogue and nothing else. Naming
+      The other real Apps have a card on the catalogue and nothing else. Naming
       a route for them would send a crawler at the 404 page, which is exactly the
       failure the conditional routes were built to avoid.
     */
-    for (const slug of ['sira', 'fiilo', 'plan-the-day', 'pick-my-lift']) {
+    for (const slug of ['fiilo', 'plan-the-day', 'pick-my-lift']) {
       expect(paths.some((path) => path.startsWith(`/apps/${slug}/`))).toBe(false);
     }
   });
@@ -130,7 +136,7 @@ test.describe('structured identity', () => {
           '@type': 'Organization',
           '@id': `${APEX}/#organization`,
           name: '10 Bit Labs',
-          legalName: '10 Bit Labs Ltd',
+          legalName: '10BIT LABS LTD',
           url: `${APEX}/`,
           logo: `${APEX}/favicon.svg`,
           email: 'hello@10bitlabs.co.uk'

@@ -1,0 +1,167 @@
+---
+import type { App } from '../lib/apps';
+
+interface Props {
+  purchase: NonNullable<App['data']['purchase']>;
+  privacyPath?: string;
+  termsPath?: string;
+}
+
+const { purchase, privacyPath, termsPath } = Astro.props;
+---
+
+<section class="pricing" aria-labelledby="pricing-title" data-app-pricing>
+  <div class="heading">
+    <h2 id="pricing-title">Access and pricing</h2>
+    <p>{purchase.intro}</p>
+  </div>
+
+  <div class="offers">
+    <article>
+      <h3>{purchase.freeLabel}</h3>
+      <p class="value">{purchase.freeValue}</p>
+      <p>{purchase.freeDescription}</p>
+    </article>
+    <article>
+      <h3>{purchase.paidLabel}</h3>
+      <p class="value">{purchase.paidValue}</p>
+      <p>{purchase.paidDescription}</p>
+    </article>
+  </div>
+
+  <div class="notes">
+    <p>{purchase.note}</p>
+    <p>{purchase.restore}</p>
+  </div>
+
+  {
+    (privacyPath || termsPath) && (
+      <nav class="legal-links" aria-label="Purchase terms">
+        {privacyPath && <a href={privacyPath}>Privacy Policy</a>}
+        {termsPath && <a href={termsPath}>Terms of Service</a>}
+      </nav>
+    )
+  }
+</section>
+
+<style>
+  .pricing {
+    margin-top: 84px;
+  }
+
+  .heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 34px;
+    align-items: end;
+    margin-bottom: 24px;
+  }
+
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .heading p,
+  .offers article > p:last-child,
+  .notes {
+    color: var(--textDim);
+    line-height: 1.65;
+  }
+
+  .offers {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-block: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+  }
+
+  .offers article {
+    padding: 32px 34px 36px 0;
+  }
+
+  .offers article + article {
+    padding-inline: 34px 0;
+    border-left: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+  }
+
+  h3 {
+    font-family: var(--font-mono);
+    font-size: var(--label-size);
+    font-weight: 400;
+    letter-spacing: var(--label-tracking);
+    color: var(--accent);
+  }
+
+  .value {
+    font-family: var(--font-heading);
+    font-size: clamp(2.2rem, 6vw, 4.25rem);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin: 16px 0 22px;
+  }
+
+  .notes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 34px;
+    font-size: 14px;
+    margin-top: 24px;
+  }
+
+  .legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin-top: 28px;
+  }
+
+  .legal-links a {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .legal-links a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 620px) {
+    .pricing {
+      margin-top: 68px;
+    }
+
+    .heading,
+    .offers,
+    .notes {
+      grid-template-columns: 1fr;
+    }
+
+    .heading {
+      gap: 10px;
+    }
+
+    .offers article,
+    .offers article + article {
+      padding: 28px 0 30px;
+      border-left: 0;
+    }
+
+    .offers article + article {
+      border-top: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+    }
+
+    .notes {
+      gap: 14px;
+    }
+  }
+</style>

@@ -7,7 +7,7 @@
  * stated here once and quoted from there.
  */
 export const COMPANY = {
-  name: '10 Bit Labs Ltd',
+  name: '10BIT LABS LTD',
   registration: 'Registered in England and Wales',
   number: '17378712',
   address: '13 Dunmow Close, Loughton, IG10',

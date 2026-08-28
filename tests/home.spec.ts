@@ -121,16 +121,20 @@ test.describe('the home page', () => {
     expect(await readCards('/')).toEqual(await readCards('/apps/'));
   });
 
-  test('leaves in-development cards unlinked and tagged, as the catalogue does', async ({
+  test('shares lifecycle states and links with the catalogue', async ({
     page
   }) => {
     await page.goto('/');
 
-    for (const name of ['Plan The Day', 'Sıra', 'Fiilo', 'Pick My Lift']) {
+    for (const name of ['Plan The Day', 'Fiilo', 'Pick My Lift']) {
       const card = cardFor(page, name);
       await expect(card.getByText('In development')).toBeVisible();
       await expect(card.getByRole('link')).toHaveCount(0);
     }
+
+    const sira = cardFor(page, 'Sıra');
+    await expect(sira.getByText('App Submission')).toBeVisible();
+    await expect(sira.getByRole('link')).toHaveAttribute('href', '/apps/sira/');
   });
 
   test('nests the featured card names under the section heading', async ({ page }) => {

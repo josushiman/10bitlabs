@@ -1,0 +1,26 @@
+---
+import { render } from 'astro:content';
+import AppLegalPage from '../../../components/AppLegalPage.astro';
+import { listApps, listTerms, type App, type AppTerms } from '../../../lib/apps';
+
+/* A terms route exists only when its sibling Markdown document has a body. */
+export async function getStaticPaths() {
+  const [apps, termsByApp] = await Promise.all([listApps(), listTerms()]);
+  return apps
+    .map((app) => ({ app, terms: termsByApp.get(app.id) }))
+    .filter((pair): pair is { app: App; terms: AppTerms } => pair.terms !== undefined)
+    .map(({ app, terms }) => ({ params: { slug: app.id }, props: { app, terms } }));
+}
+
+interface Props {
+  app: App;
+  terms: AppTerms;
+}
+
+const { app, terms } = Astro.props;
+const { Content } = await render(terms);
+---
+
+<AppLegalPage app={app} kind="terms" updated={terms.data.updated}>
+  <Content />
+</AppLegalPage>

@@ -2,12 +2,13 @@ import { getCollection, type CollectionEntry } from 'astro:content';
 
 export type App = CollectionEntry<'apps'>;
 export type AppPrivacy = CollectionEntry<'appPrivacy'>;
+export type AppTerms = CollectionEntry<'appTerms'>;
+export type AppSupport = CollectionEntry<'appSupport'>;
 
 /*
-  Underscore-prefixed entries are test fixtures. All four real Apps are in
-  development, so the linked-card branch has nothing real to render; rather than
-  leave it untested or ship a fake App, the fixture is admitted only when the
-  test harness asks for it. See playwright.config.ts.
+  Underscore-prefixed entries are test fixtures. They exercise lifecycle and
+  legal-document combinations that the real Apps do not yet cover, and are
+  admitted only when the test harness asks for them. See playwright.config.ts.
 */
 const includeFixtures = process.env.INCLUDE_APP_FIXTURES === '1';
 
@@ -70,6 +71,30 @@ export async function listPrivacyPolicies(): Promise<Map<string, AppPrivacy>> {
   const policies = await getCollection('appPrivacy');
   // An App and its policy share an id — see the collection's `generateId`.
   return new Map(policies.filter(isWritten).map((policy) => [policy.id, policy]));
+}
+
+/** Every written terms document, by the slug of the App it belongs to. */
+export async function listTerms(): Promise<Map<string, AppTerms>> {
+  const terms = await getCollection('appTerms');
+  return new Map(terms.filter(isWritten).map((document) => [document.id, document]));
+}
+
+/** Every written support guide, by the slug of the App it belongs to. */
+export async function listSupportGuides(): Promise<Map<string, AppSupport>> {
+  const guides = await getCollection('appSupport');
+  return new Map(guides.filter(isWritten).map((guide) => [guide.id, guide]));
+}
+
+/** The public label for a lifecycle state stored in content frontmatter. */
+export function statusLabelOf(app: App): string | undefined {
+  switch (app.data.status) {
+    case 'app-submission':
+      return 'App Submission';
+    case 'in-development':
+      return 'In development';
+    case 'live':
+      return undefined;
+  }
 }
 
 /** Where an App's card sends a visitor, and whether that is off the site. */

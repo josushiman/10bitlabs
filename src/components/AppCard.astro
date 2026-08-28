@@ -1,5 +1,5 @@
 ---
-import { linkOf, type App } from '../lib/apps';
+import { linkOf, statusLabelOf, type App } from '../lib/apps';
 
 interface Props {
   app: App;
@@ -12,9 +12,10 @@ interface Props {
 
 const { app, headingLevel = 2 } = Astro.props;
 const HeadingTag = `h${headingLevel}` as const;
-const { name, initials, description, platform, status, lang } = app.data;
+const { name, initials, description, platform, lang } = app.data;
 
 const link = linkOf(app);
+const statusLabel = statusLabelOf(app);
 // An App with nowhere real to send anyone is not a link. That is the whole
 // difference between this card and the design's, which assumes every App shipped.
 const Card = link ? 'a' : 'div';
@@ -40,13 +41,13 @@ const Card = link ? 'a' : 'div';
 
   <div class="foot">
     <span class="platform" data-platform>{platform}</span>
-    {status === 'in-development' && <span class="tag">In development</span>}
+    {statusLabel && <span class="tag">{statusLabel}</span>}
   </div>
 </Card>
 
 <style>
   /*
-    The badge tile, the in-development tag and the detail page's restatement of
+    The badge tile, the lifecycle tag and the detail page's restatement of
     both are one wash, one edge and one label type — named once in global.css so
     they cannot drift apart.
   */
@@ -135,7 +136,7 @@ const Card = link ? 'a' : 'div';
   }
 
   /*
-    Invented — the design has no in-development state. Built from what the card
+    Invented — the design has no lifecycle state. Built from what the card
     already says rather than a new vocabulary: the platform label's type at the
     badge tile's exact accent treatment.
   */

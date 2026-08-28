@@ -1,0 +1,256 @@
+---
+import type { App } from '../lib/apps';
+
+interface Props {
+  appName: string;
+  features: NonNullable<App['data']['features']>;
+}
+
+const { appName, features } = Astro.props;
+const [lead, ...supporting] = features.items;
+---
+
+<section class="features" aria-labelledby="features-title" data-app-features>
+  <div class="heading">
+    <h2 id="features-title">Key features</h2>
+    <p>{features.intro}</p>
+  </div>
+
+  <div class="scoreboard">
+    <aside class="score-strip" aria-label={`${appName} supports Gonga, Okey and Okey 101`}>
+      <h3 lang="tr">{appName}</h3>
+      <div class="games"><span>GONGA</span><span>OKEY</span><span>OKEY 101</span></div>
+      <div class="tally" aria-hidden="true"><span></span><span></span><span></span></div>
+    </aside>
+
+    <div class="feature-field">
+      <article class="lead">
+        <h3>{lead.title}</h3>
+        <div>
+          <p>{lead.description}</p>
+          <footer>{lead.label}</footer>
+        </div>
+      </article>
+
+      <div class="supporting">
+        {
+          supporting.map((feature) => (
+            <article class="supporting-feature">
+              <h3>{feature.title}</h3>
+              <div>
+                <p>{feature.description}</p>
+                <footer>{feature.label}</footer>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .features {
+    margin-top: 76px;
+  }
+
+  .heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: 34px;
+    align-items: end;
+    margin-bottom: 24px;
+  }
+
+  .heading h2,
+  .heading p,
+  h3,
+  p {
+    margin: 0;
+  }
+
+  .heading h2 {
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .heading p,
+  .lead p,
+  .supporting-feature p {
+    color: var(--textDim);
+    line-height: 1.65;
+  }
+
+  .scoreboard {
+    display: grid;
+    grid-template-columns: minmax(152px, 0.28fr) minmax(0, 0.72fr);
+    border: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+  }
+
+  .score-strip {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 44px;
+    padding: 28px;
+    background: var(--accent);
+    color: var(--accentText);
+    font-family: var(--font-mono);
+  }
+
+  .score-strip h3 {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+
+  .games {
+    display: grid;
+    gap: 8px;
+    font-size: var(--label-size);
+    letter-spacing: var(--label-tracking);
+  }
+
+  .tally {
+    display: grid;
+    gap: 7px;
+  }
+
+  .tally span {
+    height: 2px;
+    background: currentColor;
+    opacity: 0.68;
+  }
+
+  .tally span:nth-child(2) {
+    width: 76%;
+  }
+
+  .tally span:nth-child(3) {
+    width: 42%;
+  }
+
+  .feature-field {
+    min-width: 0;
+  }
+
+  .lead {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 32px;
+    align-items: end;
+    padding: 38px;
+    background: var(--accent-wash);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+  }
+
+  .lead h3 {
+    max-width: 12ch;
+    font-size: clamp(1.55rem, 3vw, 2.2rem);
+    line-height: 1.08;
+  }
+
+  .supporting {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .supporting-feature {
+    padding: 30px 32px 34px;
+  }
+
+  .supporting-feature:nth-child(odd) {
+    border-right: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+  }
+
+  .supporting-feature:nth-child(-n + 2) {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+  }
+
+  .supporting-feature:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 32px;
+    border-right: 0;
+  }
+
+  .supporting-feature h3 {
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+  }
+
+  .supporting-feature:last-child:nth-child(odd) h3 {
+    margin-bottom: 0;
+  }
+
+  footer {
+    margin-top: 20px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--label-size);
+    letter-spacing: var(--label-tracking);
+  }
+
+  @media (max-width: 680px) {
+    .features {
+      margin-top: 60px;
+    }
+
+    .heading {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .scoreboard {
+      grid-template-columns: 1fr;
+    }
+
+    .score-strip {
+      flex-direction: row;
+      align-items: center;
+      gap: 18px;
+      padding: 18px 20px;
+    }
+
+    .games {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
+
+    .tally {
+      width: 64px;
+      flex: 0 0 auto;
+    }
+
+    .lead,
+    .supporting,
+    .supporting-feature:last-child:nth-child(odd) {
+      grid-template-columns: 1fr;
+    }
+
+    .lead {
+      gap: 18px;
+      padding: 30px 24px;
+    }
+
+    .supporting-feature,
+    .supporting-feature:last-child:nth-child(odd) {
+      display: block;
+      grid-column: auto;
+      padding: 26px 24px 30px;
+      border-right: 0;
+      border-bottom: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+    }
+
+    .supporting-feature:last-child {
+      border-bottom: 0;
+    }
+
+    .supporting-feature:last-child:nth-child(odd) h3 {
+      margin-bottom: 12px;
+    }
+  }
+</style>

@@ -63,7 +63,7 @@ test('the legal page carries the registered company disclosure', async ({ page }
   await page.goto('/legal/');
   const details = page.getByRole('main');
 
-  await expect(details).toContainText('10 Bit Labs Ltd');
+  await expect(details).toContainText('10BIT LABS LTD');
   await expect(details).toContainText('Registered in England and Wales');
   await expect(details).toContainText('17378712');
   await expect(details).toContainText('13 Dunmow Close, Loughton, IG10');

@@ -21,7 +21,7 @@ Add JSON-LD using only facts already visible on the site.
 The canonical home page carries a graph containing:
 
 - `WebSite`: `10 Bit Labs` and `https://10bitlabs.co.uk/`.
-- `Organization`: the public name, legal name `10 Bit Labs Ltd`, canonical URL,
+- `Organization`: the public name, legal name `10BIT LABS LTD`, canonical URL,
   the Studio's existing crawlable logo asset, and `hello@10bitlabs.co.uk`.
 - Stable `@id` values link the website to its publisher rather than describing two
   unrelated entities.

@@ -3,9 +3,8 @@ import { cardFor, expectLegibleAtEitherEnd } from './support';
 
 /*
   Routes materialise from content: an App gets a detail page when, and only when,
-  something has been written about it. The four real Apps have nothing written,
-  so the branches that do exist are proved by fixture Apps admitted into the test
-  build alone — see src/lib/apps.ts.
+  something has been written about it. Sıra now has a public page; fixtures keep
+  exercising combinations that no real App has reached yet.
 */
 
 test.describe('the App detail route', () => {
@@ -17,9 +16,49 @@ test.describe('the App detail route', () => {
     await expect(page.getByText('Fixture body copy, which is what makes this App')).toBeVisible();
   });
 
+  test('Sıra has its dedicated public page and submission state', async ({ page }) => {
+    const response = await page.goto('/apps/sira');
+    expect(response?.status()).toBe(200);
+
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sıra');
+    await expect(page.getByText('App Submission')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Key features' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Keep scores clear' })).toBeVisible();
+    await expect(page.getByText('LIVE TALLY')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Access and pricing' })).toBeVisible();
+    await expect(page.getByText('£2.99 once')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Need help?' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Contact support' })).toHaveAttribute(
+      'href',
+      'mailto:sirasupport@10bitlabs.co.uk'
+    );
+  });
+
+  test('Sıra links to its support process and confirmed legal pages', async ({ page }) => {
+    await page.goto('/apps/sira');
+
+    await expect(page.getByRole('link', { name: 'Request a refund' })).toHaveAttribute(
+      'href',
+      '/apps/sira/support/#refund-and-billing-help'
+    );
+    await expect(page.getByRole('link', { name: 'Restore a purchase' })).toHaveAttribute(
+      'href',
+      '/apps/sira/support/#restore-a-purchase'
+    );
+    await expect(page.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
+      'href',
+      '/apps/sira/privacy/'
+    );
+    await expect(page.getByRole('link', { name: 'Privacy Policy' })).toHaveCount(1);
+    await expect(page.getByRole('link', { name: 'Terms of Service' })).toHaveAttribute(
+      'href',
+      '/apps/sira/terms/'
+    );
+    await expect(page.getByRole('link', { name: 'Terms of Service' })).toHaveCount(1);
+  });
+
   test('an App with no body has no detail route', async ({ page }) => {
-    // All four real Apps are in this state, and none of them may have a page.
-    for (const slug of ['plan-the-day', 'sira', 'fiilo', 'pick-my-lift']) {
+    for (const slug of ['plan-the-day', 'fiilo', 'pick-my-lift']) {
       const response = await page.goto(`/apps/${slug}`);
       expect(response?.status(), `/apps/${slug} should not exist`).toBe(404);
     }
@@ -34,8 +73,10 @@ test.describe('the App detail route', () => {
     // An internal page is not somewhere else's tab.
     await expect(written).not.toHaveAttribute('target', '_blank');
 
+    await expect(cardFor(page, 'Sıra').getByRole('link')).toHaveAttribute('href', '/apps/sira/');
+
     // Nothing written, so nothing to link to — whatever the App's status.
-    for (const name of ['Plan The Day', 'Sıra', 'Fiilo', 'Pick My Lift']) {
+    for (const name of ['Plan The Day', 'Fiilo', 'Pick My Lift']) {
       await expect(cardFor(page, name).getByRole('link')).toHaveCount(0);
     }
   });
@@ -78,14 +119,19 @@ test.describe('the App detail route', () => {
       'href',
       '/apps/_fixture-launched-app/privacy/'
     );
+    await expect(page.getByRole('link', { name: /terms of service/ })).toHaveAttribute(
+      'href',
+      '/apps/_fixture-launched-app/terms/'
+    );
 
     // Neither a listing nor a policy, so neither link.
     await page.goto('/apps/_fixture-detailed-app');
     await expect(page.getByRole('link', { name: /open / })).toHaveCount(0);
     await expect(page.getByRole('link', { name: /privacy policy/ })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /terms of service/ })).toHaveCount(0);
   });
 
   test('the detail page is legible on a small phone and on a desktop', async ({ page }) => {
-    await expectLegibleAtEitherEnd(page, '/apps/_fixture-detailed-app');
+    await expectLegibleAtEitherEnd(page, '/apps/sira');
   });
 });
