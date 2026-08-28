@@ -1,9 +1,10 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import SiraAppIcon from './SiraAppIcon.astro';
 
 interface Props {
-  icon?: ImageMetadata;
+  icon?: ImageMetadata | 'sira';
   initials: string;
   width: number;
   height: number;
@@ -14,12 +15,25 @@ const { icon, initials, width, height, class: className } = Astro.props;
 ---
 
 <div class:list={['app-mark', className, { 'has-icon': !!icon }]} data-badge aria-hidden="true">
-  {icon ? <Image src={icon} alt="" {width} {height} /> : initials}
+  {
+    icon === 'sira' ? (
+      <SiraAppIcon />
+    ) : icon ? (
+      <Image src={icon} alt="" {width} {height} />
+    ) : (
+      initials
+    )
+  }
 </div>
 
 <style>
   .app-mark {
     overflow: hidden;
+  }
+
+  .app-mark.has-icon {
+    container-type: inline-size;
+    overflow: visible;
   }
 
   .app-mark :global(img) {

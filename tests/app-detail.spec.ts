@@ -21,7 +21,8 @@ test.describe('the App detail route', () => {
     expect(response?.status()).toBe(200);
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sıra');
-    await expect(page.locator('[data-badge] img')).toBeVisible();
+    await expect(page.locator('[data-badge] .sira-icon')).toBeVisible();
+    await expect(page.locator('[data-badge] img')).toHaveCount(0);
     await expect(page.getByText('SR', { exact: true })).toHaveCount(0);
     await expect(page.getByText('App Submission')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Key features' })).toBeVisible();

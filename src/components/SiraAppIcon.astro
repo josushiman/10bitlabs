@@ -1,0 +1,95 @@
+<div class="sira-icon">
+  <div class="vignette"></div>
+  <div class="art">
+    <div class="sira-card card-one">
+      <div class="diamond"></div>
+    </div>
+    <div class="sira-card card-two">
+      <div class="number">7</div>
+      <div class="dot"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .sira-icon {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 22.265625%;
+    box-shadow: 0 4.6875cqw 11.71875cqw rgb(26 24 21 / 22%);
+    background: linear-gradient(155deg, #1b5540 0%, #0f3427 100%);
+  }
+
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 90% at 26% 12%, rgb(255 255 255 / 14%), transparent 62%);
+  }
+
+  .art {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 58.59375%;
+    height: 58.59375%;
+    transform: translate(-50%, -50%);
+  }
+
+  .sira-card {
+    position: absolute;
+    width: 44%;
+    height: 63.333333%;
+  }
+
+  .card-one {
+    left: 7.333333%;
+    top: 14.666667%;
+    border-radius: 6.666667%;
+    transform: rotate(-14deg);
+    box-shadow: 0 2.34375cqw 5.859375cqw rgb(0 0 0 / 28%);
+    background: #fbf8f0;
+  }
+
+  .diamond {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 42.424242%;
+    aspect-ratio: 1;
+    border-radius: 16.071429%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    background: #c2452f;
+  }
+
+  .card-two {
+    left: 48%;
+    top: 10.666667%;
+    border-radius: 6%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5.333333%;
+    transform: rotate(9deg);
+    box-shadow: 0 2.734375cqw 6.640625cqw rgb(0 0 0 / 30%);
+    background: #efe4c9;
+  }
+
+  .number {
+    font-family: 'IBM Plex Mono', var(--font-mono);
+    font-size: 14.84375cqw;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: #123a2c;
+  }
+
+  .dot {
+    width: 6.666667%;
+    aspect-ratio: 1;
+    border-radius: 99px;
+    background: #c2452f;
+  }
+</style>

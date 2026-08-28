@@ -23,8 +23,8 @@ const apps = defineCollection({
   }),
   schema: ({ image }) => z.object({
     name: z.string(),
-    /** The App's icon, shown in place of initials when supplied. */
-    icon: image().optional(),
+    /** A sourced image or a named HTML icon, shown in place of initials. */
+    icon: z.union([image(), z.literal('sira')]).optional(),
     /** Two or three characters for the badge tile when no icon is available. */
     initials: z.string(),
     description: z.string(),

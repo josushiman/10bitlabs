@@ -43,9 +43,8 @@ test.describe('the app catalogue', () => {
       await expect(card.getByText(app.platform, { exact: true })).toBeVisible();
 
       if (app.name === 'Sıra') {
-        const icon = card.locator('[data-badge] img');
-        await expect(icon).toBeVisible();
-        await expect(icon).toHaveAttribute('src', /\.svg$/);
+        await expect(card.locator('[data-badge] .sira-icon')).toBeVisible();
+        await expect(card.locator('[data-badge] img')).toHaveCount(0);
         await expect(card.getByText(app.initials, { exact: true })).toHaveCount(0);
       } else {
         await expect(card.getByText(app.initials, { exact: true })).toBeVisible();
