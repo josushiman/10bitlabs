@@ -1,95 +1,35 @@
-<div class="sira-icon">
-  <div class="vignette"></div>
-  <div class="art">
-    <div class="sira-card card-one">
-      <div class="diamond"></div>
-    </div>
-    <div class="sira-card card-two">
-      <div class="number">7</div>
-      <div class="dot"></div>
+---
+interface Props {
+  size: number;
+}
+
+const { size } = Astro.props;
+const sizeClass = `sira-icon--${size}`;
+---
+
+<!-- The supplied 512px artwork, scaled as a single unit. -->
+<div class:list={['sira-icon', sizeClass]}>
+  <div class="sira-canvas">
+    <div class="sira-vignette"></div>
+    <div class="sira-art">
+      <div class="sira-card-one"><div class="sira-diamond"></div></div>
+      <div class="sira-card-two"><div class="sira-number">7</div><div class="sira-dot"></div></div>
     </div>
   </div>
 </div>
 
 <style>
-  .sira-icon {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    overflow: hidden;
-    border-radius: 22.265625%;
-    box-shadow: 0 4.6875cqw 11.71875cqw rgb(26 24 21 / 22%);
-    background: linear-gradient(155deg, #1b5540 0%, #0f3427 100%);
-  }
-
-  .vignette {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(120% 90% at 26% 12%, rgb(255 255 255 / 14%), transparent 62%);
-  }
-
-  .art {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 58.59375%;
-    height: 58.59375%;
-    transform: translate(-50%, -50%);
-  }
-
-  .sira-card {
-    position: absolute;
-    width: 44%;
-    height: 63.333333%;
-  }
-
-  .card-one {
-    left: 7.333333%;
-    top: 14.666667%;
-    border-radius: 6.666667%;
-    transform: rotate(-14deg);
-    box-shadow: 0 2.34375cqw 5.859375cqw rgb(0 0 0 / 28%);
-    background: #fbf8f0;
-  }
-
-  .diamond {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 42.424242%;
-    aspect-ratio: 1;
-    border-radius: 16.071429%;
-    transform: translate(-50%, -50%) rotate(45deg);
-    background: #c2452f;
-  }
-
-  .card-two {
-    left: 48%;
-    top: 10.666667%;
-    border-radius: 6%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5.333333%;
-    transform: rotate(9deg);
-    box-shadow: 0 2.734375cqw 6.640625cqw rgb(0 0 0 / 30%);
-    background: #efe4c9;
-  }
-
-  .number {
-    font-family: 'IBM Plex Mono', var(--font-mono);
-    font-size: 14.84375cqw;
-    font-weight: 600;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    color: #123a2c;
-  }
-
-  .dot {
-    width: 6.666667%;
-    aspect-ratio: 1;
-    border-radius: 99px;
-    background: #c2452f;
-  }
+  .sira-icon { position: relative; overflow: visible; }
+  .sira-icon--56 { width: 56px; height: 56px; }
+  .sira-icon--116 { width: 116px; height: 116px; }
+  .sira-canvas { width: 512px; height: 512px; position: absolute; overflow: hidden; border-radius: 114px; transform-origin: top left; box-shadow: rgb(26 24 21 / 22%) 0 24px 60px; background: linear-gradient(155deg, rgb(27 85 64) 0%, rgb(15 52 39) 100%); }
+  .sira-icon--56 .sira-canvas { transform: scale(0.109375); }
+  .sira-icon--116 .sira-canvas { transform: scale(0.2265625); }
+  .sira-vignette { position: absolute; inset: 0; background: radial-gradient(120% 90% at 26% 12%, rgb(255 255 255 / 14%), transparent 62%); }
+  .sira-art { position: absolute; left: 50%; top: 50%; width: 300px; height: 300px; transform: translate(-50%, -50%); }
+  .sira-card-one { position: absolute; left: 22px; top: 44px; width: 132px; height: 190px; border-radius: 20px; transform: rotate(-14deg); box-shadow: rgb(0 0 0 / 28%) 0 12px 30px; background: rgb(251 248 240); }
+  .sira-diamond { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; border-radius: 9px; transform: translate(-50%, -50%) rotate(45deg); background: rgb(194 69 47); }
+  .sira-card-two { position: absolute; left: 144px; top: 32px; width: 132px; height: 190px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; transform: rotate(9deg); box-shadow: rgb(0 0 0 / 30%) 0 14px 34px; background: rgb(239 228 201); }
+  .sira-number { color: rgb(18 58 44); font-family: 'IBM Plex Mono', monospace; font-size: 76px; font-style: normal; font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+  .sira-dot { width: 20px; height: 20px; border-radius: 99px; background: rgb(194 69 47); }
 </style>
