@@ -21,9 +21,11 @@ const apps = defineCollection({
     pattern: ['**/*.md', '!**/*.privacy.md', '!**/*.terms.md', '!**/*.support.md'],
     base: './src/content/apps'
   }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     name: z.string(),
-    /** Two or three characters for the badge tile. */
+    /** The App's icon, shown in place of initials when supplied. */
+    icon: image().optional(),
+    /** Two or three characters for the badge tile when no icon is available. */
     initials: z.string(),
     description: z.string(),
     /** Free text, because store wording changes more often than a schema should. */

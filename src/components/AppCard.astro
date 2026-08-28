@@ -1,4 +1,5 @@
 ---
+import AppMark from './AppMark.astro';
 import { linkOf, statusLabelOf, type App } from '../lib/apps';
 
 interface Props {
@@ -12,7 +13,7 @@ interface Props {
 
 const { app, headingLevel = 2 } = Astro.props;
 const HeadingTag = `h${headingLevel}` as const;
-const { name, initials, description, platform, lang } = app.data;
+const { name, icon, initials, description, platform, lang } = app.data;
 
 const link = linkOf(app);
 const statusLabel = statusLabelOf(app);
@@ -27,7 +28,7 @@ const Card = link ? 'a' : 'div';
   {...link ? { href: link.href } : {}}
   {...link?.external ? { target: '_blank', rel: 'noopener' } : {}}
 >
-  <div class="badge" data-badge aria-hidden="true">{initials}</div>
+  <AppMark class="badge" icon={icon} initials={initials} width={56} height={56} />
 
   <div>
     {/*
@@ -85,7 +86,7 @@ const Card = link ? 'a' : 'div';
     }
   }
 
-  .badge {
+  :global(.badge) {
     width: 56px;
     height: 56px;
     flex-shrink: 0;

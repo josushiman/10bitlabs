@@ -1,5 +1,6 @@
 ---
 name: Sıra
+icon: ../../assets/apps/sira/icon.png
 initials: SR
 description: Score tallying for Okey and Gonga, without the paper and pen.
 platform: iOS
