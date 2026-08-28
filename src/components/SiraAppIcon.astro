@@ -32,4 +32,9 @@ const sizeClass = `sira-icon--${size}`;
   .sira-card-two { position: absolute; left: 144px; top: 32px; width: 132px; height: 190px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; transform: rotate(9deg); box-shadow: rgb(0 0 0 / 30%) 0 14px 34px; background: rgb(239 228 201); }
   .sira-number { color: rgb(18 58 44); font-family: 'IBM Plex Mono', monospace; font-size: 76px; font-style: normal; font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
   .sira-dot { width: 20px; height: 20px; border-radius: 99px; background: rgb(194 69 47); }
+
+  @media (max-width: 600px) {
+    .sira-icon--116 { width: 72px; height: 72px; }
+    .sira-icon--116 .sira-canvas { transform: scale(0.140625); }
+  }
 </style>

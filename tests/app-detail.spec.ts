@@ -137,4 +137,18 @@ test.describe('the App detail route', () => {
   test('the detail page is legible on a small phone and on a desktop', async ({ page }) => {
     await expectLegibleAtEitherEnd(page, '/apps/sira');
   });
+
+  test('Sıra icon stays inside its mobile header mark', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto('/apps/sira');
+
+    const mark = page.locator('[data-badge]');
+    const icon = mark.locator('.sira-icon');
+    const [markBox, iconBox] = await Promise.all([mark.boundingBox(), icon.boundingBox()]);
+
+    expect(markBox).not.toBeNull();
+    expect(iconBox).not.toBeNull();
+    expect(iconBox!.width).toBeLessThanOrEqual(markBox!.width);
+    expect(iconBox!.height).toBeLessThanOrEqual(markBox!.height);
+  });
 });
