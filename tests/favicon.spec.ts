@@ -21,4 +21,13 @@ test('every page offers the icon, and it is served', async ({ page, request }) =
     expect(response.status(), file).toBe(200);
     expect(response.headers()['content-type'], file).toContain(type);
   }
+
+  const svgDimensions = await page.evaluate(async () => {
+    const image = new Image();
+    image.src = '/favicon.svg';
+    await image.decode();
+    return { width: image.naturalWidth, height: image.naturalHeight };
+  });
+  expect(svgDimensions.width).toBeGreaterThan(0);
+  expect(svgDimensions.height).toBeGreaterThan(0);
 });
