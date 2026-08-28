@@ -13,7 +13,7 @@ interface Props {
 const { icon, initials, width, height, class: className } = Astro.props;
 ---
 
-<div class:list={['app-mark', className]} data-badge aria-hidden="true">
+<div class:list={['app-mark', className, { 'has-icon': !!icon }]} data-badge aria-hidden="true">
   {icon ? <Image src={icon} alt="" {width} {height} /> : initials}
 </div>
 
