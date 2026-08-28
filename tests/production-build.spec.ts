@@ -6,9 +6,8 @@ import { sitemapUrls } from './support';
 
 /*
   Every other test in this suite runs against the build the fixtures are admitted
-  into, because that is the only build in which a written App exists at all. This
-  one runs against the build the public gets: no fixtures, and nothing written
-  about any of the four real Apps.
+  into. This one runs against the build the public gets: no fixtures, Sıra's real
+  detail, legal, and support pages.
 
   It is the guard on the promise the routes are built around — that a page cannot
   be published by accident. A filter that stopped filtering, or a placeholder body
@@ -46,14 +45,19 @@ test.describe('the build the public gets', () => {
   });
   test.slow();
 
-  test('publishes no detail or privacy page for any App', async () => {
+  test('publishes every written Sıra route and no unwritten App routes', async () => {
     const routes = (await filesUnder(OUT))
       .filter((file) => file.endsWith('.html'))
       .map((file) => `/${relative(OUT, file).replace(/(index)?\.html$/, '').replace(/\/$/, '')}`);
 
-    // The catalogue is a page; nothing below it is, because nothing is written.
+    // Sıra is the one real App with written detail, legal, and support copy.
     expect(routes).toContain('/apps');
-    expect(routes.filter((route) => route.startsWith('/apps/'))).toEqual([]);
+    expect(routes.filter((route) => route.startsWith('/apps/')).sort()).toEqual([
+      '/apps/sira',
+      '/apps/sira/privacy',
+      '/apps/sira/support',
+      '/apps/sira/terms'
+    ]);
   });
 
   test('ships no trace of the test fixtures', async () => {
@@ -63,12 +67,15 @@ test.describe('the build the public gets', () => {
     }
   });
 
-  test('ships no App structured data without an App detail page', async () => {
-    for (const file of await filesUnder(OUT)) {
-      if (!file.endsWith('.html')) continue;
-      expect(await readFile(file, 'utf8'), `${file} describes an unpublished App`).not.toContain(
-        'SoftwareApplication'
-      );
+  test('ships App structured data only on Sıra detail', async () => {
+    const htmlFiles = (await filesUnder(OUT)).filter((file) => file.endsWith('.html'));
+    for (const file of htmlFiles) {
+      const html = await readFile(file, 'utf8');
+      if (file.endsWith(join('apps', 'sira', 'index.html'))) {
+        expect(html).toContain('SoftwareApplication');
+      } else {
+        expect(html, `${file} describes an unpublished App`).not.toContain('SoftwareApplication');
+      }
     }
   });
 
@@ -83,7 +90,14 @@ test.describe('the build the public gets', () => {
     const paths = sitemapUrls(sitemap).map((url) => url.pathname);
 
     expect(paths).toContain('/apps/');
-    expect(paths.filter((path) => path !== '/apps/' && path.startsWith('/apps/'))).toEqual([]);
+    expect(
+      paths.filter((path) => path !== '/apps/' && path.startsWith('/apps/')).sort()
+    ).toEqual([
+      '/apps/sira/',
+      '/apps/sira/privacy/',
+      '/apps/sira/support/',
+      '/apps/sira/terms/'
+    ]);
     expect(sitemap).not.toContain('fixture');
   });
 });

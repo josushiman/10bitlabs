@@ -4,7 +4,7 @@ Status: ready-for-agent
 
 ## Problem Statement
 
-10 Bit Labs Ltd is a registered UK company with no web presence. The domain `10bitlabs.co.uk` is registered at GoDaddy and has a working mailbox (`hello@10bitlabs.co.uk`, iCloud+ custom domain), but nothing is served at the domain itself.
+10BIT LABS LTD is a registered UK company with no web presence. The domain `10bitlabs.co.uk` is registered at GoDaddy and has a working mailbox (`hello@10bitlabs.co.uk`, iCloud+ custom domain), but nothing is served at the domain itself.
 
 This causes several concrete problems:
 
@@ -253,7 +253,7 @@ The DKIM CNAME must be **DNS only** in Cloudflare, never proxied. Proxied, Cloud
 
 ### Documentation deliverables
 
-- `CONTEXT.md` at the repo root, seeded with: **Studio** (10 Bit Labs Ltd — designs, builds and publishes its own products; explicitly not an agency and not available for hire), **App** (a published or in-development product with its own audience, store listing and privacy policy; the site's core entity), and **Marketing site** (this repository's site — the term replaces "holding page", which understates a six-page site with a catalogue and materially misled early planning). Glossary only, no implementation detail.
+- `CONTEXT.md` at the repo root, seeded with: **Studio** (10BIT LABS LTD — designs, builds and publishes its own products; explicitly not an agency and not available for hire), **App** (a published or in-development product with its own audience, store listing and privacy policy; the site's core entity), and **Marketing site** (this repository's site — the term replaces "holding page", which understates a six-page site with a catalogue and materially misled early planning). Glossary only, no implementation detail.
 - `docs/adr/0001-cloudflare-workers-static-hosting.md`, recording the hosting decision, with GitHub Pages and Netlify as the considered and rejected alternatives, and the "this is a seed, not a terminal state" reasoning that decided it.
 
 ## Testing Decisions

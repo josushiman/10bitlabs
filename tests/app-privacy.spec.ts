@@ -22,12 +22,24 @@ test.describe('the per-App privacy route', () => {
     expect(new URL(page.url()).pathname.replace(/\/$/, '')).toBe('/apps/_fixture-live-app/privacy');
   });
 
+  test('Sıra publishes its confirmed Privacy Policy', async ({ page }) => {
+    const response = await page.goto('/apps/sira/privacy');
+    expect(response?.status()).toBe(200);
+
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Sıra');
+    await expect(page.locator('main')).toContainText('provided by 10BIT LABS LTD');
+    await expect(page.getByRole('heading', { name: 'Information stored on your device' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'sirasupport@10bitlabs.co.uk' })).toHaveAttribute(
+      'href',
+      'mailto:sirasupport@10bitlabs.co.uk'
+    );
+  });
+
   test('an App with no privacy body has no privacy route', async ({ page }) => {
-    // The four real Apps, and a fifth that has a detail page but no policy —
-    // the two routes are written separately and appear separately.
+    // Other real Apps, and a fixture that has a detail page but no policy — the
+    // routes are written separately and appear separately.
     for (const slug of [
       'plan-the-day',
-      'sira',
       'fiilo',
       'pick-my-lift',
       '_fixture-detailed-app'

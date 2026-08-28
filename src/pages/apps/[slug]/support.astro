@@ -1,0 +1,119 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Prose from '../../../components/Prose.astro';
+import {
+  hasDetail,
+  listApps,
+  listSupportGuides,
+  type App,
+  type AppSupport
+} from '../../../lib/apps';
+
+export async function getStaticPaths() {
+  const [apps, guides] = await Promise.all([listApps(), listSupportGuides()]);
+  return apps
+    .map((app) => ({ app, support: guides.get(app.id) }))
+    .filter((pair): pair is { app: App; support: AppSupport } => pair.support !== undefined)
+    .map(({ app, support }) => ({ params: { slug: app.id }, props: { app, support } }));
+}
+
+interface Props {
+  app: App;
+  support: AppSupport;
+}
+
+const { app, support } = Astro.props;
+const { Content } = await render(support);
+const backPath = hasDetail(app) ? `/apps/${app.id}/` : '/apps/';
+const backLabel = hasDetail(app) ? `Back to ${app.data.name}` : 'All apps';
+---
+
+<BaseLayout
+  title={`${app.data.name} support — 10 Bit Labs`}
+  description={support.data.summary}
+>
+  <article class="page column">
+    <a class="back" href={backPath}>{backLabel}</a>
+    <h1><span lang={app.data.lang}>{app.data.name}</span> support</h1>
+    <p class="standfirst">{support.data.summary}</p>
+
+    <nav class="actions" aria-label={`${app.data.name} support topics`}>
+      <a href="#refund-and-billing-help">Request a refund</a>
+      <a href="#restore-a-purchase">Restore a purchase</a>
+      <a href="#refund-and-billing-help">Billing help</a>
+      <a href="#report-a-problem">Report a problem</a>
+      <a href={`mailto:${support.data.email}`}>Contact support</a>
+    </nav>
+
+    <Prose>
+      <Content />
+    </Prose>
+  </article>
+</BaseLayout>
+
+<style>
+  .page {
+    max-width: 760px;
+    padding-block: 84px 120px;
+  }
+
+  .back {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--textDim);
+    margin-bottom: 42px;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    text-wrap: balance;
+    margin: 0 0 20px;
+  }
+
+  .standfirst {
+    max-width: 58ch;
+    color: var(--textDim);
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding-block: 26px;
+    margin-block: 40px 48px;
+    border-block: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+  }
+
+  .actions a {
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .actions a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 600px) {
+    .page {
+      padding-block: 56px 88px;
+    }
+
+    .back {
+      margin-bottom: 36px;
+    }
+  }
+</style>

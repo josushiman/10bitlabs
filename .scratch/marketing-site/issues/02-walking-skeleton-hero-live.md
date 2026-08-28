@@ -45,7 +45,7 @@ Hero:
 - Sub-paragraph 18px, `line-height:1.6`, `var(--textDim)`, `max-width:52ch`.
 - Call to action `./explore-apps →`: `padding:14px 26px`, `var(--accent)` on `var(--accentText)`, `border-radius:8px`, JetBrains Mono 600 / 15px, hover `filter:brightness(1.08)`.
 
-Footer: top border `1px solid color-mix(in srgb, var(--border) 40%, transparent)`, inner `max-width:1100px`, `padding:32px 28px`, JetBrains Mono 12px `var(--textDim)`, reading `// © {year} 10 Bit Labs Ltd`.
+Footer: top border `1px solid color-mix(in srgb, var(--border) 40%, transparent)`, inner `max-width:1100px`, `padding:32px 28px`, JetBrains Mono 12px `var(--textDim)`, reading `// © {year} 10BIT LABS LTD`.
 
 **Blocked by:** None — can start immediately.
 

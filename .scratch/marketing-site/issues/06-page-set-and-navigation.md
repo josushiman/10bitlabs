@@ -34,7 +34,7 @@ Note the design's menu carries only Home, Apps, About and Contact. Privacy and C
 
 Page measurements: About is `max-width:760px` / `padding:80px 28px 100px`; Contact is `max-width:640px` / `padding:120px 28px 140px`, centre-aligned; Privacy and Legal are `max-width:680px` / `padding:100px 28px 120px`. Each opens with its `//` label in JetBrains Mono 13px `var(--accent)` and an `h1` in Space Grotesk 600 — `clamp(2rem, 4.5vw, 3rem)` on About, `clamp(1.8rem, 4vw, 2.6rem)` on Contact, `clamp(1.8rem, 4vw, 2.4rem)` on Privacy and Legal. About's body paragraphs are 18px / `line-height:1.7`; Privacy's are 16px / `line-height:1.7`. The Legal page's details block is JetBrains Mono 14px at `line-height:2`; About's company card repeats it at 13px / `line-height:1.9` inside a `border-radius:12px` box with `padding:24px`.
 
-The design already carries the real company details — 10 Bit Labs Ltd, registered in England and Wales, company number 17378712, registered address 13 Dunmow Close, Loughton, IG10. Use them; they are not placeholders.
+The design already carries the real company details — 10BIT LABS LTD, registered in England and Wales, company number 17378712, registered address 13 Dunmow Close, Loughton, IG10. Use them; they are not placeholders.
 
 There is **no 404 page in the design**, so it is being invented. Build it from the vocabulary already established: a `//` section label, a Space Grotesk heading, and a JetBrains Mono link home in the `$`/`./` command style used elsewhere.
 

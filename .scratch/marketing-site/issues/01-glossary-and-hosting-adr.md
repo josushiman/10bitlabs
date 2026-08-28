@@ -4,7 +4,7 @@
 
 Two documents. First, the repo-root domain glossary, seeded with three terms:
 
-- **Studio** — 10 Bit Labs Ltd. Designs, builds and publishes its own products. Explicitly not an agency and not available for hire; the About copy says so directly, and the distinction is load-bearing for how the site is written.
+- **Studio** — 10BIT LABS LTD. Designs, builds and publishes its own products. Explicitly not an agency and not available for hire; the About copy says so directly, and the distinction is load-bearing for how the site is written.
 - **App** — a published or in-development product with its own audience, its own store listing, and its own privacy policy. The core entity of the site.
 - **Marketing site** — this repository's site. The term deliberately replaces "holding page", which understates a six-page site with a catalogue, and which materially misled early planning toward a single-file build with no real URLs.
 

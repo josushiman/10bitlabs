@@ -10,14 +10,17 @@ import { z } from 'astro/zod';
   that come next — the body becomes the App's detail page, and its absence is what
   stops an empty page ever being published.
 
-  An App needs two long-form bodies and a markdown file has one, so the privacy
-  policy is a sibling file: `<slug>.privacy.md` beside `<slug>.md`. Writing that
-  file is the whole of what publishes an App's privacy route, and deleting it is
-  the whole of what withdraws it.
+  An App can have several long-form bodies and a markdown file has one, so its
+  privacy policy, terms of service and support guide are sibling files beside
+  `<slug>.md`. Writing one of those files is the whole of what publishes its
+  route, and deleting it is the whole of what withdraws it.
 */
 const apps = defineCollection({
-  // The sibling privacy files are their own collection; they are not Apps.
-  loader: glob({ pattern: ['**/*.md', '!**/*.privacy.md'], base: './src/content/apps' }),
+  // The sibling legal files are their own collections; they are not Apps.
+  loader: glob({
+    pattern: ['**/*.md', '!**/*.privacy.md', '!**/*.terms.md', '!**/*.support.md'],
+    base: './src/content/apps'
+  }),
   schema: z.object({
     name: z.string(),
     /** Two or three characters for the badge tile. */
@@ -25,7 +28,35 @@ const apps = defineCollection({
     description: z.string(),
     /** Free text, because store wording changes more often than a schema should. */
     platform: z.string(),
-    status: z.enum(['live', 'in-development']),
+    status: z.enum(['live', 'app-submission', 'in-development']),
+    features: z
+      .object({
+        intro: z.string(),
+        items: z
+          .array(
+            z.object({
+              title: z.string(),
+              label: z.string(),
+              description: z.string()
+            })
+          )
+          .min(3)
+          .max(6)
+      })
+      .optional(),
+    purchase: z
+      .object({
+        intro: z.string(),
+        freeLabel: z.string(),
+        freeValue: z.string(),
+        freeDescription: z.string(),
+        paidLabel: z.string(),
+        paidValue: z.string(),
+        paidDescription: z.string(),
+        note: z.string(),
+        restore: z.string()
+      })
+      .optional(),
     /** Store listing or the App's own site. Only a `live` App links out. */
     url: z.url().optional(),
     /*
@@ -64,4 +95,32 @@ const appPrivacy = defineCollection({
   })
 });
 
-export const collections = { apps, appPrivacy };
+/*
+  The terms of service for one App. It follows the privacy policy's publication
+  rule exactly: a non-empty `<slug>.terms.md` creates `/apps/<slug>/terms/`, and
+  an App without that file has no empty legal page for a visitor to find.
+*/
+const appTerms = defineCollection({
+  loader: glob({
+    pattern: '**/*.terms.md',
+    base: './src/content/apps',
+    generateId: ({ entry }) => entry.replace(/\.terms\.md$/, '')
+  }),
+  schema: z.object({ updated: z.coerce.date().optional() })
+});
+
+/* A written support guide publishes one App's stable public support route. */
+const appSupport = defineCollection({
+  loader: glob({
+    pattern: '**/*.support.md',
+    base: './src/content/apps',
+    generateId: ({ entry }) => entry.replace(/\.support\.md$/, '')
+  }),
+  schema: z.object({
+    email: z.email(),
+    responseTime: z.string(),
+    summary: z.string()
+  })
+});
+
+export const collections = { apps, appPrivacy, appTerms, appSupport };

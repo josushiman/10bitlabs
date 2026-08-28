@@ -1,6 +1,6 @@
 # 10 Bit Labs marketing site
 
-The public site for 10 Bit Labs Ltd, at [10bitlabs.co.uk](https://10bitlabs.co.uk).
+The public site for 10BIT LABS LTD, trading publicly as 10 Bit Labs, at [10bitlabs.co.uk](https://10bitlabs.co.uk).
 A statically generated [Astro](https://astro.build) project deployed to Cloudflare
 Workers static assets.
 

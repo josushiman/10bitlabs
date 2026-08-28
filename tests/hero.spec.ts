@@ -51,7 +51,7 @@ test.describe('the hero', () => {
       page.getByText('10bitlabs — zsh'),
       page.getByText('$ whoami'),
       page.getByRole('link', { name: './explore-apps →' }),
-      page.locator('footer').getByText('10 Bit Labs Ltd'),
+      page.locator('footer').getByText('10BIT LABS LTD'),
       page.getByText('10 Bit Labs', { exact: true })
     ];
     for (const part of monoParts) {

@@ -39,10 +39,10 @@ const apps = await listApps();
 
   /*
     Invented, and needed: the design linked every card to a store, so its
-    featured section had no route to the catalogue of its own. No App has
-    anywhere to link to yet, which would leave this section a dead end. It is
-    the site's ordinary route line rather than a second button competing with
-    the hero's.
+    featured section had no route to the catalogue of its own. The catalogue
+    route keeps the full set reachable even as individual App pages appear. It
+    uses the site's ordinary route line rather than a second button competing
+    with the hero's.
   */
   .featured > :global(.route) {
     display: inline-block;

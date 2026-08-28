@@ -55,15 +55,18 @@ test.describe('the app catalogue', () => {
     expect(headings.indexOf('Fiilo')).toBeLessThan(headings.indexOf('Pick My Lift'));
   });
 
-  test('renders an in-development entry unlinked and tagged', async ({ page }) => {
+  test('renders each unreleased lifecycle state and links only written Apps', async ({ page }) => {
     await page.goto('/apps');
 
-    for (const app of SEED) {
-      const card = cardFor(page, app.name);
+    for (const name of ['Plan The Day', 'Fiilo', 'Pick My Lift']) {
+      const card = cardFor(page, name);
       await expect(card.getByText('In development')).toBeVisible();
-      // Nothing on an unshipped card may offer a link that goes nowhere.
       await expect(card.getByRole('link')).toHaveCount(0);
     }
+
+    const sira = cardFor(page, 'Sıra');
+    await expect(sira.getByText('App Submission')).toBeVisible();
+    await expect(sira.getByRole('link')).toHaveAttribute('href', '/apps/sira/');
   });
 
   test('renders a live entry that has a link as a linked card', async ({ page }) => {
@@ -78,7 +81,7 @@ test.describe('the app catalogue', () => {
     await expect(card.getByText('In development')).toHaveCount(0);
   });
 
-  test('claims nothing has shipped', async ({ page }) => {
+  test('makes no release claim for an unreleased App', async ({ page }) => {
     await page.goto('/apps');
     const copy = (await page.locator('main').innerText()).toLowerCase();
 
@@ -170,7 +173,7 @@ test.describe('the app catalogue', () => {
     expect(grid.columns).toBe(3);
   });
 
-  test('builds the in-development tag from the vocabulary already on the card', async ({
+  test('builds the lifecycle tag from the vocabulary already on the card', async ({
     page
   }) => {
     await page.goto('/apps');

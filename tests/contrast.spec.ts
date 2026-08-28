@@ -18,8 +18,11 @@ const ROUTES = [
   '/privacy/',
   '/legal/',
   '/no-such-page',
+  '/apps/sira/',
+  '/apps/sira/support/',
   '/apps/_fixture-launched-app/',
-  '/apps/_fixture-live-app/privacy/'
+  '/apps/_fixture-live-app/privacy/',
+  '/apps/_fixture-launched-app/terms/'
 ];
 
 interface Failure {
