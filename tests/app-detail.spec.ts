@@ -52,6 +52,18 @@ test.describe('the App detail route', () => {
       )
       .toBe(true);
     await expect(gallery.getByRole('status')).toHaveText('1 / 4');
+    await expect(gallery.locator('.gallery-heading + .gallery-controls')).toHaveCount(1);
+
+    const visibleScreens = await gallery.locator('[data-gallery-slide]').evaluateAll((slides) => {
+      const viewport = document.querySelector('[data-gallery-viewport]');
+      if (!viewport) return 0;
+      const bounds = viewport.getBoundingClientRect();
+      return slides.filter((slide) => {
+        const screen = slide.getBoundingClientRect();
+        return screen.left < bounds.right && screen.right > bounds.left;
+      }).length;
+    });
+    expect(visibleScreens).toBe(3);
 
     const previous = gallery.getByRole('button', { name: 'Show previous screen' });
     const next = gallery.getByRole('button', { name: 'Show next screen' });
@@ -59,22 +71,27 @@ test.describe('the App detail route', () => {
     await expect(next).toBeEnabled();
 
     await next.click();
+    await expect
+      .poll(() => gallery.locator('[data-gallery-viewport]').evaluate((viewport) => viewport.scrollLeft))
+      .toBeGreaterThan(1);
     await expect(gallery.getByRole('status')).toHaveText('2 / 4');
     await expect(previous).toBeEnabled();
+    await expect(next).toBeDisabled();
 
     await previous.click();
     await expect(gallery.getByRole('status')).toHaveText('1 / 4');
   });
 
-  test('Sıra’s carousel works after navigation and keeps screens inset on a phone', async ({
-    page
-  }) => {
+  test('Sıra’s carousel works after navigation and sits clear of a phone edge', async ({ page }) => {
     await page.goto('/apps/');
     await page.locator('[data-card][href="/apps/sira/"]').click();
     await expect(page).toHaveURL('/apps/sira/');
 
     const gallery = page.locator('[data-app-gallery]');
     await gallery.getByRole('button', { name: 'Show next screen' }).click();
+    await expect
+      .poll(() => gallery.locator('[data-gallery-viewport]').evaluate((viewport) => viewport.scrollLeft))
+      .toBeGreaterThan(1);
     await expect(gallery.getByRole('status')).toHaveText('2 / 4');
     await gallery.getByRole('button', { name: 'Show previous screen' }).click();
     await expect(gallery.getByRole('status')).toHaveText('1 / 4');
@@ -83,11 +100,29 @@ test.describe('the App detail route', () => {
       .toBeLessThanOrEqual(1);
 
     await page.setViewportSize({ width: 320, height: 640 });
+    const galleryBounds = await gallery.boundingBox();
     const viewport = await gallery.locator('[data-gallery-viewport]').boundingBox();
-    const screen = await gallery.locator('.screen').first().boundingBox();
+    const mobileScreens = await gallery.locator('[data-gallery-slide]').evaluateAll((slides) => {
+      const viewport = document.querySelector('[data-gallery-viewport]');
+      if (!viewport) return { count: 0, nextVisibleWidth: 0 };
+      const bounds = viewport.getBoundingClientRect();
+      const visible = slides.filter((slide) => {
+        const screen = slide.getBoundingClientRect();
+        return screen.left < bounds.right && screen.right > bounds.left;
+      }).length;
+      const next = slides[1]?.getBoundingClientRect();
+      return {
+        count: visible,
+        nextVisibleWidth: next
+          ? Math.max(0, Math.min(next.right, bounds.right) - Math.max(next.left, bounds.left))
+          : 0
+      };
+    });
+    expect(galleryBounds).not.toBeNull();
     expect(viewport).not.toBeNull();
-    expect(screen).not.toBeNull();
-    expect(screen!.x - viewport!.x).toBeGreaterThanOrEqual(30);
+    expect(viewport!.x - galleryBounds!.x).toBeGreaterThanOrEqual(10);
+    expect(mobileScreens.count).toBeGreaterThanOrEqual(2);
+    expect(mobileScreens.nextVisibleWidth).toBeGreaterThanOrEqual(16);
   });
 
   test('Sıra links to its support process and confirmed legal pages', async ({ page }) => {

@@ -15,28 +15,29 @@ const { appName, screenshots } = Astro.props;
     <section class="gallery" aria-labelledby="gallery-title" data-app-gallery>
       <div class="gallery-heading">
         <h2 id="gallery-title">A look inside</h2>
-        {
-          screenshots.length > 1 ? (
-            <div class="gallery-controls" aria-label="Screenshot controls" data-gallery-controls>
-              <button type="button" aria-label="Show previous screen" data-gallery-previous disabled>
-                <svg viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="m9.5 3-5 5 5 5" />
-                </svg>
-              </button>
-              <p role="status" aria-live="polite" aria-atomic="true" data-gallery-position>
-                1 / {screenshots.length}
-              </p>
-              <button type="button" aria-label="Show next screen" data-gallery-next>
-                <svg viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="m6.5 3 5 5-5 5" />
-                </svg>
-              </button>
-            </div>
-          ) : (
-            <p>1 screen</p>
-          )
-        }
       </div>
+
+      {
+        screenshots.length > 1 ? (
+          <div class="gallery-controls" aria-label="Screenshot controls" data-gallery-controls>
+            <button type="button" aria-label="Show previous screen" data-gallery-previous disabled>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m9.5 3-5 5 5 5" />
+              </svg>
+            </button>
+            <p role="status" aria-live="polite" aria-atomic="true" data-gallery-position>
+              1 / {screenshots.length}
+            </p>
+            <button type="button" aria-label="Show next screen" data-gallery-next>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m6.5 3 5 5-5 5" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <p class="screen-count">1 screen</p>
+        )
+      }
 
       <div class="gallery-viewport" data-gallery-viewport>
         <ul>
@@ -81,35 +82,34 @@ const { appName, screenshots } = Astro.props;
     boundGalleries.add(gallery);
 
     const currentSlide = () => {
-      let current = 0;
-      let closest = Number.POSITIVE_INFINITY;
-
-      slides.forEach((slide, index) => {
-        const distance = Math.abs(slide.offsetLeft - viewport.scrollLeft);
-        if (distance < closest) {
-          current = index;
-          closest = distance;
-        }
-      });
-
-      return current;
+      const viewportLeft = viewport.getBoundingClientRect().left;
+      const current = slides.findIndex(
+        (slide) => slide.getBoundingClientRect().right > viewportLeft + 1
+      );
+      return current === -1 ? slides.length - 1 : current;
     };
+
+    const isAtStart = () => viewport.scrollLeft <= 1;
+    const isAtEnd = () => viewport.scrollLeft >= viewport.scrollWidth - viewport.clientWidth - 1;
 
     const update = () => {
       const current = currentSlide();
       position.textContent = `${current + 1} / ${slides.length}`;
-      previous.disabled = current === 0;
-      next.disabled = current === slides.length - 1;
+      previous.disabled = isAtStart();
+      next.disabled = isAtEnd();
     };
 
-    const show = (index: number) => {
-      const target = slides[index];
-      if (!target) return;
-      viewport.scrollTo({ left: target.offsetLeft });
+    const move = (direction: 1 | -1) => {
+      const maximum = viewport.scrollWidth - viewport.clientWidth;
+      const left = Math.min(
+        Math.max(viewport.scrollLeft + viewport.clientWidth * direction, 0),
+        maximum
+      );
+      viewport.scrollTo({ left });
     };
 
-    previous.addEventListener('click', () => show(currentSlide() - 1));
-    next.addEventListener('click', () => show(currentSlide() + 1));
+    previous.addEventListener('click', () => move(-1));
+    next.addEventListener('click', () => move(1));
     viewport.addEventListener('scroll', update, { passive: true });
     update();
   };
@@ -127,11 +127,7 @@ const { appName, screenshots } = Astro.props;
   }
 
   .gallery-heading {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 22px;
+    margin-bottom: 14px;
   }
 
   h2 {
@@ -140,13 +136,15 @@ const { appName, screenshots } = Astro.props;
     margin: 0;
   }
 
-  .gallery-heading p,
+  .gallery-controls p,
+  .screen-count,
   figcaption {
     font-family: var(--font-mono);
     color: var(--textDim);
   }
 
-  .gallery-heading p {
+  .gallery-controls p,
+  .screen-count {
     font-size: var(--label-size);
     letter-spacing: var(--label-tracking);
     margin: 0;
@@ -155,7 +153,9 @@ const { appName, screenshots } = Astro.props;
   .gallery-controls {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
+    margin-bottom: 20px;
   }
 
   .gallery-controls p {
@@ -216,8 +216,9 @@ const { appName, screenshots } = Astro.props;
 
   ul {
     display: grid;
-    grid-auto-columns: 100%;
+    grid-auto-columns: calc((100% - 40px) / 3);
     grid-auto-flow: column;
+    gap: 20px;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -227,7 +228,7 @@ const { appName, screenshots } = Astro.props;
     display: grid;
     justify-items: center;
     margin: 0;
-    padding: clamp(28px, 6vw, 56px) 28px 24px;
+    padding: clamp(28px, 6vw, 56px) 0 24px;
   }
 
   .screen {
@@ -263,17 +264,24 @@ const { appName, screenshots } = Astro.props;
   }
 
   @media (max-width: 480px) {
-    .gallery-heading {
-      align-items: center;
-    }
-
     .gallery-viewport {
-      padding-inline: 12px;
-      scroll-padding-inline: 12px;
+      margin-inline: 12px;
     }
 
-    figure {
-      padding-inline: 20px;
+    ul {
+      grid-auto-columns: min(64vw, 250px);
+      gap: 14px;
+    }
+
+    figcaption {
+      width: 100%;
+    }
+  }
+
+  @media (min-width: 481px) and (max-width: 760px) {
+    ul {
+      grid-auto-columns: calc((100% - 14px) / 2);
+      gap: 14px;
     }
   }
 </style>
