@@ -34,6 +34,38 @@ test.describe('the App detail route', () => {
     );
   });
 
+  test('Sıra’s screenshots can be explored as a carousel', async ({ page }) => {
+    await page.goto('/apps/sira');
+
+    const gallery = page.locator('[data-app-gallery]');
+    await expect(gallery).toBeVisible();
+    await expect
+      .poll(() =>
+        gallery
+          .locator('[data-gallery-slide]')
+          .first()
+          .getByRole('img')
+          .evaluate((image) => {
+            const screenshot = image as HTMLImageElement;
+            return screenshot.complete && screenshot.naturalWidth > 0;
+          })
+      )
+      .toBe(true);
+    await expect(gallery.getByRole('status')).toHaveText('1 / 4');
+
+    const previous = gallery.getByRole('button', { name: 'Show previous screen' });
+    const next = gallery.getByRole('button', { name: 'Show next screen' });
+    await expect(previous).toBeDisabled();
+    await expect(next).toBeEnabled();
+
+    await next.click();
+    await expect(gallery.getByRole('status')).toHaveText('2 / 4');
+    await expect(previous).toBeEnabled();
+
+    await previous.click();
+    await expect(gallery.getByRole('status')).toHaveText('1 / 4');
+  });
+
   test('Sıra links to its support process and confirmed legal pages', async ({ page }) => {
     await page.goto('/apps/sira');
 
