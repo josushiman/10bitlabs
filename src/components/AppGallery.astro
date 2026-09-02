@@ -15,28 +15,111 @@ const { appName, screenshots } = Astro.props;
     <section class="gallery" aria-labelledby="gallery-title" data-app-gallery>
       <div class="gallery-heading">
         <h2 id="gallery-title">A look inside</h2>
-        <p>{screenshots.length} {screenshots.length === 1 ? 'screen' : 'screens'}</p>
       </div>
 
-      <ul>
-        {screenshots.map((screenshot) => (
-          <li>
-            <figure>
-              <div class="screen">
-                <Image
-                  src={screenshot.image}
-                  alt={`${appName} app screen: ${screenshot.label}`}
-                  loading="lazy"
-                />
-              </div>
-              <figcaption>{screenshot.label}</figcaption>
-            </figure>
-          </li>
-        ))}
-      </ul>
+      {
+        screenshots.length > 1 ? (
+          <div class="gallery-controls" aria-label="Screenshot controls" data-gallery-controls>
+            <button type="button" aria-label="Show previous screen" data-gallery-previous disabled>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m9.5 3-5 5 5 5" />
+              </svg>
+            </button>
+            <p role="status" aria-live="polite" aria-atomic="true" data-gallery-position>
+              1 / {screenshots.length}
+            </p>
+            <button type="button" aria-label="Show next screen" data-gallery-next>
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="m6.5 3 5 5-5 5" />
+              </svg>
+            </button>
+          </div>
+        ) : (
+          <p class="screen-count">1 screen</p>
+        )
+      }
+
+      <div class="gallery-viewport" data-gallery-viewport>
+        <ul>
+          {screenshots.map((screenshot, index) => (
+            <li data-gallery-slide>
+              <figure>
+                <div class="screen">
+                  <Image
+                    src={screenshot.image}
+                    alt={`${appName} app screen: ${screenshot.label}`}
+                    loading={index === 0 ? 'eager' : 'lazy'}
+                  />
+                </div>
+                <figcaption>{screenshot.label}</figcaption>
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   )
 }
+
+<script>
+  /*
+    The gallery deliberately lets the browser do the sliding. A scroll-snap
+    track keeps touch, trackpad and button navigation in agreement, without a
+    duplicated JavaScript idea of where the screen is.
+  */
+  const boundGalleries = new WeakSet<HTMLElement>();
+
+  const bindGallery = (gallery: HTMLElement) => {
+    if (boundGalleries.has(gallery)) return;
+
+    const viewport = gallery.querySelector<HTMLElement>('[data-gallery-viewport]');
+    const slides = [...gallery.querySelectorAll<HTMLElement>('[data-gallery-slide]')];
+    const previous = gallery.querySelector<HTMLButtonElement>('[data-gallery-previous]');
+    const next = gallery.querySelector<HTMLButtonElement>('[data-gallery-next]');
+    const position = gallery.querySelector<HTMLElement>('[data-gallery-position]');
+
+    if (!viewport || !previous || !next || !position || slides.length < 2) return;
+    boundGalleries.add(gallery);
+
+    const currentSlide = () => {
+      const viewportLeft = viewport.getBoundingClientRect().left;
+      const current = slides.findIndex(
+        (slide) => slide.getBoundingClientRect().right > viewportLeft + 1
+      );
+      return current === -1 ? slides.length - 1 : current;
+    };
+
+    const isAtStart = () => viewport.scrollLeft <= 1;
+    const isAtEnd = () => viewport.scrollLeft >= viewport.scrollWidth - viewport.clientWidth - 1;
+
+    const update = () => {
+      const current = currentSlide();
+      position.textContent = `${current + 1} / ${slides.length}`;
+      previous.disabled = isAtStart();
+      next.disabled = isAtEnd();
+    };
+
+    const move = (direction: 1 | -1) => {
+      const maximum = viewport.scrollWidth - viewport.clientWidth;
+      const left = Math.min(
+        Math.max(viewport.scrollLeft + viewport.clientWidth * direction, 0),
+        maximum
+      );
+      viewport.scrollTo({ left });
+    };
+
+    previous.addEventListener('click', () => move(-1));
+    next.addEventListener('click', () => move(1));
+    viewport.addEventListener('scroll', update, { passive: true });
+    update();
+  };
+
+  const bindGalleries = () =>
+    document.querySelectorAll<HTMLElement>('[data-app-gallery]').forEach(bindGallery);
+
+  bindGalleries();
+  document.addEventListener('astro:page-load', bindGalleries);
+</script>
 
 <style>
   .gallery {
@@ -44,11 +127,7 @@ const { appName, screenshots } = Astro.props;
   }
 
   .gallery-heading {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 22px;
+    margin-bottom: 14px;
   }
 
   h2 {
@@ -57,21 +136,88 @@ const { appName, screenshots } = Astro.props;
     margin: 0;
   }
 
-  .gallery-heading p,
+  .gallery-controls p,
+  .screen-count,
   figcaption {
     font-family: var(--font-mono);
     color: var(--textDim);
   }
 
-  .gallery-heading p {
+  .gallery-controls p,
+  .screen-count {
     font-size: var(--label-size);
     letter-spacing: var(--label-tracking);
     margin: 0;
   }
 
+  .gallery-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .gallery-controls p {
+    min-width: 3.5rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  button {
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--text);
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+
+  button:hover:not(:disabled) {
+    color: var(--accentText);
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+  }
+
+  button svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+
+  .gallery-viewport {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    background: var(--bg2);
+    border: 1px solid color-mix(in srgb, var(--border) 64%, transparent);
+  }
+
+  .gallery-viewport::-webkit-scrollbar {
+    display: none;
+  }
+
   ul {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-columns: calc((100% - 40px) / 3);
+    grid-auto-flow: column;
     gap: 20px;
     list-style: none;
     margin: 0;
@@ -79,10 +225,14 @@ const { appName, screenshots } = Astro.props;
   }
 
   figure {
+    display: grid;
+    justify-items: center;
     margin: 0;
+    padding: clamp(28px, 6vw, 56px) 0 24px;
   }
 
   .screen {
+    width: min(100%, 336px);
     overflow: hidden;
     border-radius: 16px;
     background: var(--bg2);
@@ -96,26 +246,42 @@ const { appName, screenshots } = Astro.props;
   }
 
   figcaption {
+    width: min(100%, 336px);
     font-size: 12px;
     line-height: 1.5;
     margin-top: 10px;
   }
 
-  @media (max-width: 620px) {
-    ul {
-      grid-auto-flow: column;
-      grid-auto-columns: min(76vw, 280px);
-      grid-template-columns: none;
-      gap: 14px;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-color: var(--border) transparent;
-      padding: 0 28px 18px;
-      margin-inline: -28px;
+  li {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gallery-viewport {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .gallery-viewport {
+      margin-inline: 12px;
     }
 
-    li {
-      scroll-snap-align: start;
+    ul {
+      grid-auto-columns: min(64vw, 250px);
+      gap: 14px;
+    }
+
+    figcaption {
+      width: 100%;
+    }
+  }
+
+  @media (min-width: 481px) and (max-width: 760px) {
+    ul {
+      grid-auto-columns: calc((100% - 14px) / 2);
+      gap: 14px;
     }
   }
 </style>
