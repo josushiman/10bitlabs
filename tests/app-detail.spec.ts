@@ -66,6 +66,30 @@ test.describe('the App detail route', () => {
     await expect(gallery.getByRole('status')).toHaveText('1 / 4');
   });
 
+  test('Sıra’s carousel works after navigation and keeps screens inset on a phone', async ({
+    page
+  }) => {
+    await page.goto('/apps/');
+    await page.locator('[data-card][href="/apps/sira/"]').click();
+    await expect(page).toHaveURL('/apps/sira/');
+
+    const gallery = page.locator('[data-app-gallery]');
+    await gallery.getByRole('button', { name: 'Show next screen' }).click();
+    await expect(gallery.getByRole('status')).toHaveText('2 / 4');
+    await gallery.getByRole('button', { name: 'Show previous screen' }).click();
+    await expect(gallery.getByRole('status')).toHaveText('1 / 4');
+    await expect
+      .poll(() => gallery.locator('[data-gallery-viewport]').evaluate((viewport) => viewport.scrollLeft))
+      .toBeLessThanOrEqual(1);
+
+    await page.setViewportSize({ width: 320, height: 640 });
+    const viewport = await gallery.locator('[data-gallery-viewport]').boundingBox();
+    const screen = await gallery.locator('.screen').first().boundingBox();
+    expect(viewport).not.toBeNull();
+    expect(screen).not.toBeNull();
+    expect(screen!.x - viewport!.x).toBeGreaterThanOrEqual(30);
+  });
+
   test('Sıra links to its support process and confirmed legal pages', async ({ page }) => {
     await page.goto('/apps/sira');
 
