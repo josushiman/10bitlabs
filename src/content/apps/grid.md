@@ -1,5 +1,6 @@
 ---
 name: Grid
+icon: ../../assets/apps/grid/icon.svg
 initials: GR
 description: A home measurement notebook, from window dimensions to room and floor plans.
 platform: iOS
