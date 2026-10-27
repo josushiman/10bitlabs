@@ -93,7 +93,7 @@ export function statusLabelOf(app: App): string | undefined {
     case 'in-development':
       return 'In development';
     case 'live':
-      return undefined;
+      return 'Live';
   }
 }
 
