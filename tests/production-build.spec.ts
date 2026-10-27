@@ -26,7 +26,7 @@ async function filesUnder(dir: string): Promise<string[]> {
   return found;
 }
 
-// One build, shared by both assertions — so they cannot race each other into
+// One build, shared by the assertions — so they cannot race each other into
 // the same output directory.
 test.describe.configure({ mode: 'serial' });
 
@@ -64,6 +64,19 @@ test.describe('the build the public gets', () => {
     for (const file of await filesUnder(OUT)) {
       if (!file.endsWith('.html')) continue;
       expect(await readFile(file, 'utf8'), `${file} mentions a fixture`).not.toContain('Fixture');
+    }
+  });
+
+  test('ships no archived design documents or canvas runtime', async () => {
+    // These protocol strings survive copying, renaming, and JS bundling. Check
+    // every emitted file, not only HTML, to guard the CodeQL scope exclusion.
+    const runtimeMarkers = ['__dc_design_mode', '__dc_probe', '__dc_theme'];
+    for (const file of await filesUnder(OUT)) {
+      expect(file, `${file} is an archived design export`).not.toMatch(/\.dc\.html$/i);
+      const contents = await readFile(file);
+      for (const marker of runtimeMarkers) {
+        expect(contents.includes(marker), `${file} contains canvas runtime marker ${marker}`).toBe(false);
+      }
     }
   });
 

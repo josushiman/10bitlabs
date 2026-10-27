@@ -1,0 +1,8 @@
+name: 10 Bit Labs
+
+# Generated canvas runtime retained only to open the archived design documents.
+# It is neither a build input nor a deployed asset. The production-build test
+# rejects its protocol markers anywhere in the output, including bundled JS.
+# Keep the exclusion to this file; application code and scripts stay in scope.
+paths-ignore:
+  - docs/design/support.js

@@ -4,7 +4,8 @@ icon: sira
 initials: SR
 description: Score tallying for Okey and Gonga, without the paper and pen.
 platform: iOS
-status: app-submission
+status: live
+url: https://apps.apple.com/us/app/s%C4%B1ra/id6806818734
 lang: tr
 order: 2
 features:
