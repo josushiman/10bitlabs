@@ -16,7 +16,7 @@ test.describe('the App detail route', () => {
     await expect(page.getByText('Fixture body copy, which is what makes this App')).toBeVisible();
   });
 
-  test('Sıra has its dedicated public page and submission state', async ({ page }) => {
+  test('Sıra has its dedicated public page and live App Store link', async ({ page }) => {
     const response = await page.goto('/apps/sira');
     expect(response?.status()).toBe(200);
 
@@ -24,7 +24,15 @@ test.describe('the App detail route', () => {
     await expect(page.locator('[data-badge] .sira-icon')).toBeVisible();
     await expect(page.locator('[data-badge] img')).toHaveCount(0);
     await expect(page.getByText('SR', { exact: true })).toHaveCount(0);
-    await expect(page.getByText('App Submission')).toBeVisible();
+    await expect(page.getByText('Live', { exact: true })).toBeVisible();
+    await expect(page.getByText('App Submission')).toHaveCount(0);
+    const storeLink = page.getByRole('link', { name: 'open Sıra' });
+    await expect(storeLink).toHaveAttribute(
+      'href',
+      'https://apps.apple.com/us/app/s%C4%B1ra/id6806818734'
+    );
+    await expect(storeLink).toHaveAttribute('target', '_blank');
+    await expect(storeLink).toHaveAttribute('rel', /noopener/);
     await expect(page.getByRole('heading', { name: 'Key features' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Keep scores clear' })).toBeVisible();
     await expect(page.getByText('LIVE TALLY')).toBeVisible();

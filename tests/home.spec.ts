@@ -133,7 +133,7 @@ test.describe('the home page', () => {
     }
 
     const sira = cardFor(page, 'Sıra');
-    await expect(sira.getByText('App Submission')).toBeVisible();
+    await expect(sira.getByText('Live', { exact: true })).toBeVisible();
     await expect(sira.getByRole('link')).toHaveAttribute('href', '/apps/sira/');
   });
 
