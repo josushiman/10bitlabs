@@ -12,9 +12,9 @@
     "test:scripts": "node --test scripts/*.test.mjs"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.12",
-    "@playwright/test": "^1.64.1",
-    "@types/node": "^26.6.5",
+    "@astrojs/check": "^0.9.10",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^26.2.0",
     "astro": "^7.4.2",
     "parse5": "^8.0.1",
     "typescript": "^5.9.3",
