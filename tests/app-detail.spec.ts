@@ -16,7 +16,7 @@ test.describe('the App detail route', () => {
     await expect(page.getByText('Fixture body copy, which is what makes this App')).toBeVisible();
   });
 
-  test('Sıra has its dedicated public page and submission state', async ({ page }) => {
+  test('Sıra has its dedicated public page and live App Store link', async ({ page }) => {
     const response = await page.goto('/apps/sira');
     expect(response?.status()).toBe(200);
 
@@ -24,7 +24,15 @@ test.describe('the App detail route', () => {
     await expect(page.locator('[data-badge] .sira-icon')).toBeVisible();
     await expect(page.locator('[data-badge] img')).toHaveCount(0);
     await expect(page.getByText('SR', { exact: true })).toHaveCount(0);
-    await expect(page.getByText('App Submission')).toBeVisible();
+    await expect(page.getByText('Live', { exact: true })).toBeVisible();
+    await expect(page.getByText('App Submission')).toHaveCount(0);
+    const storeLink = page.getByRole('link', { name: 'open Sıra' });
+    await expect(storeLink).toHaveAttribute(
+      'href',
+      'https://apps.apple.com/us/app/s%C4%B1ra/id6806818734'
+    );
+    await expect(storeLink).toHaveAttribute('target', '_blank');
+    await expect(storeLink).toHaveAttribute('rel', /noopener/);
     await expect(page.getByRole('heading', { name: 'Key features' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Keep scores clear' })).toBeVisible();
     await expect(page.getByText('LIVE TALLY')).toBeVisible();
@@ -35,6 +43,97 @@ test.describe('the App detail route', () => {
       'href',
       'mailto:sirasupport@10bitlabs.co.uk'
     );
+  });
+
+  test('Sıra’s screenshots can be explored as a carousel', async ({ page }) => {
+    await page.goto('/apps/sira');
+
+    const gallery = page.locator('[data-app-gallery]');
+    await expect(gallery).toBeVisible();
+    await expect
+      .poll(() =>
+        gallery
+          .locator('[data-gallery-slide]')
+          .first()
+          .getByRole('img')
+          .evaluate((image) => {
+            const screenshot = image as HTMLImageElement;
+            return screenshot.complete && screenshot.naturalWidth > 0;
+          })
+      )
+      .toBe(true);
+    await expect(gallery.getByRole('status')).toHaveText('1 / 4');
+    await expect(gallery.locator('.gallery-heading + .gallery-controls')).toHaveCount(1);
+
+    const visibleScreens = await gallery.locator('[data-gallery-slide]').evaluateAll((slides) => {
+      const viewport = document.querySelector('[data-gallery-viewport]');
+      if (!viewport) return 0;
+      const bounds = viewport.getBoundingClientRect();
+      return slides.filter((slide) => {
+        const screen = slide.getBoundingClientRect();
+        return screen.left < bounds.right && screen.right > bounds.left;
+      }).length;
+    });
+    expect(visibleScreens).toBe(3);
+
+    const previous = gallery.getByRole('button', { name: 'Show previous screen' });
+    const next = gallery.getByRole('button', { name: 'Show next screen' });
+    await expect(previous).toBeDisabled();
+    await expect(next).toBeEnabled();
+
+    await next.click();
+    await expect
+      .poll(() => gallery.locator('[data-gallery-viewport]').evaluate((viewport) => viewport.scrollLeft))
+      .toBeGreaterThan(1);
+    await expect(gallery.getByRole('status')).toHaveText('2 / 4');
+    await expect(previous).toBeEnabled();
+    await expect(next).toBeDisabled();
+
+    await previous.click();
+    await expect(gallery.getByRole('status')).toHaveText('1 / 4');
+  });
+
+  test('Sıra’s carousel works after navigation and sits clear of a phone edge', async ({ page }) => {
+    await page.goto('/apps/');
+    await page.locator('[data-card][href="/apps/sira/"]').click();
+    await expect(page).toHaveURL('/apps/sira/');
+
+    const gallery = page.locator('[data-app-gallery]');
+    await gallery.getByRole('button', { name: 'Show next screen' }).click();
+    await expect
+      .poll(() => gallery.locator('[data-gallery-viewport]').evaluate((viewport) => viewport.scrollLeft))
+      .toBeGreaterThan(1);
+    await expect(gallery.getByRole('status')).toHaveText('2 / 4');
+    await gallery.getByRole('button', { name: 'Show previous screen' }).click();
+    await expect(gallery.getByRole('status')).toHaveText('1 / 4');
+    await expect
+      .poll(() => gallery.locator('[data-gallery-viewport]').evaluate((viewport) => viewport.scrollLeft))
+      .toBeLessThanOrEqual(1);
+
+    await page.setViewportSize({ width: 320, height: 640 });
+    const galleryBounds = await gallery.boundingBox();
+    const viewport = await gallery.locator('[data-gallery-viewport]').boundingBox();
+    const mobileScreens = await gallery.locator('[data-gallery-slide]').evaluateAll((slides) => {
+      const viewport = document.querySelector('[data-gallery-viewport]');
+      if (!viewport) return { count: 0, nextVisibleWidth: 0 };
+      const bounds = viewport.getBoundingClientRect();
+      const visible = slides.filter((slide) => {
+        const screen = slide.getBoundingClientRect();
+        return screen.left < bounds.right && screen.right > bounds.left;
+      }).length;
+      const next = slides[1]?.getBoundingClientRect();
+      return {
+        count: visible,
+        nextVisibleWidth: next
+          ? Math.max(0, Math.min(next.right, bounds.right) - Math.max(next.left, bounds.left))
+          : 0
+      };
+    });
+    expect(galleryBounds).not.toBeNull();
+    expect(viewport).not.toBeNull();
+    expect(viewport!.x - galleryBounds!.x).toBeGreaterThanOrEqual(10);
+    expect(mobileScreens.count).toBeGreaterThanOrEqual(2);
+    expect(mobileScreens.nextVisibleWidth).toBeGreaterThanOrEqual(16);
   });
 
   test('Sıra links to its support process and confirmed legal pages', async ({ page }) => {
