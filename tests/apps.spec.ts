@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { cardFor, expectLegibleAtEitherEnd } from './support';
 
-/** The four seed entries, in the order the content files ask for. */
+/** The public entries, in the order the content files ask for. */
 const SEED = [
   {
     name: 'Plan The Day',
@@ -26,6 +26,12 @@ const SEED = [
     initials: 'PML',
     platform: 'iOS',
     description: 'A curated exercise picker, matched to the equipment you have available.'
+  },
+  {
+    name: 'Grid',
+    initials: 'GR',
+    platform: 'iOS',
+    description: 'A home measurement notebook, from window dimensions to room and floor plans.'
   }
 ];
 
@@ -66,6 +72,7 @@ test.describe('the app catalogue', () => {
     expect(headings.indexOf('Plan The Day')).toBeLessThan(headings.indexOf('Sıra'));
     expect(headings.indexOf('Sıra')).toBeLessThan(headings.indexOf('Fiilo'));
     expect(headings.indexOf('Fiilo')).toBeLessThan(headings.indexOf('Pick My Lift'));
+    expect(headings.indexOf('Pick My Lift')).toBeLessThan(headings.indexOf('Grid'));
   });
 
   test('shows live and in-development Apps and links only written Apps', async ({ page }) => {
@@ -80,6 +87,10 @@ test.describe('the app catalogue', () => {
     const sira = cardFor(page, 'Sıra');
     await expect(sira.getByText('Live', { exact: true })).toBeVisible();
     await expect(sira.getByRole('link')).toHaveAttribute('href', '/apps/sira/');
+
+    const grid = cardFor(page, 'Grid');
+    await expect(grid.getByText('In development')).toBeVisible();
+    await expect(grid.getByRole('link')).toHaveAttribute('href', '/apps/grid/');
   });
 
   test('renders a live entry that has a link as a linked card', async ({ page }) => {
