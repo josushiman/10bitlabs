@@ -46,6 +46,12 @@ test.describe('the app catalogue', () => {
         await expect(card.locator('[data-badge] .sira-icon')).toBeVisible();
         await expect(card.locator('[data-badge] img')).toHaveCount(0);
         await expect(card.getByText(app.initials, { exact: true })).toHaveCount(0);
+      } else if (app.name === 'Pick My Lift') {
+        const icon = card.locator('[data-badge] img');
+        await expect(icon).toBeVisible();
+        await expect(icon).toHaveJSProperty('complete', true);
+        expect(await icon.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+        await expect(card.getByText(app.initials, { exact: true })).toHaveCount(0);
       } else {
         await expect(card.getByText(app.initials, { exact: true })).toBeVisible();
       }
@@ -62,7 +68,7 @@ test.describe('the app catalogue', () => {
     expect(headings.indexOf('Fiilo')).toBeLessThan(headings.indexOf('Pick My Lift'));
   });
 
-  test('renders each unreleased lifecycle state and links only written Apps', async ({ page }) => {
+  test('shows live and in-development Apps and links only written Apps', async ({ page }) => {
     await page.goto('/apps');
 
     for (const name of ['Plan The Day', 'Fiilo', 'Pick My Lift']) {
@@ -72,7 +78,7 @@ test.describe('the app catalogue', () => {
     }
 
     const sira = cardFor(page, 'Sıra');
-    await expect(sira.getByText('App Submission')).toBeVisible();
+    await expect(sira.getByText('Live', { exact: true })).toBeVisible();
     await expect(sira.getByRole('link')).toHaveAttribute('href', '/apps/sira/');
   });
 
