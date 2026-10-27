@@ -24,6 +24,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: npm run test:scripts
       - run: npx playwright install --with-deps chromium
       # Playwright builds the site and serves it with wrangler dev itself, so
       # what the browser sees here is the production build behind the real

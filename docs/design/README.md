@@ -21,6 +21,25 @@ of it rather than a fresh interpretation.
   and nothing in the site should reference it.** Kept only so the two `.dc.html`
   files still render if opened in a browser.
 
+## Security scanning boundary
+
+The archived `support.js` runtime accepts canvas messages without checking their
+origin (CodeQL alert #2, `js/missing-origin-check`). It is generated third-party
+reference code, and its source project is not part of this repository. Keep it
+unchanged to preserve the original export.
+
+`.github/codeql/codeql-config.yml` excludes exactly `docs/design/support.js` from
+analysis. The `security-extended` query suite still scans application code, build
+scripts, tests, and other documentation. This is a scope exclusion for an
+undeployed reference, not a fix to its message handler.
+
+`tests/production-build.spec.ts` checks every emitted file for the runtime's
+message protocol markers, so copying it into public assets or bundling it into
+application JavaScript fails CI. It also rejects exported `.dc.html` files. If
+the runtime ever becomes an application dependency, remove the exclusion and
+validate both an explicit trusted origin and the expected sender before handling
+messages; do not ship the archived version.
+
 ## Reading the markup
 
 The `.dc.html` files use canvas template constructs that have no equivalent in the

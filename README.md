@@ -13,6 +13,7 @@ alternatives are in [`docs/adr/0001-cloudflare-workers-static-hosting.md`](docs/
 npm install
 npm run dev      # Astro dev server, fast feedback
 npm run check    # typecheck
+npm run test:scripts # offline checks for build and font-vendoring scripts
 npm test         # builds, serves with wrangler, drives a real browser
 ```
 
@@ -24,8 +25,11 @@ which is what the test suite does.
 ## How the pieces fit
 
 - **Fonts** are vendored into `public/fonts/` by `scripts/fetch-fonts.mjs`, which
-  also generates `src/styles/fonts.css`. The site never talks to Google at
-  runtime — that is what makes the privacy claim true by construction.
+  also generates `src/styles/fonts.css`. Downloads must match the reviewed URLs,
+  sizes, and SHA-256 checksums in `scripts/fonts-manifest.mjs`. To update a font,
+  review its source and change the manifest; the script restores pinned assets
+  rather than trusting fresh Google Fonts CSS. The site never talks to Google
+  at runtime — that is what makes the privacy claim true by construction.
 - **Headers** are generated into `dist/_headers` by `scripts/emit-headers.mjs`
   after every build. It hashes the inline theme script out of the built HTML, so
   the CSP admits that one script by hash and nothing has to be relaxed. It fails
