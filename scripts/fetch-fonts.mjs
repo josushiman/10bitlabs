@@ -1,63 +1,123 @@
-// Downloads the two typefaces from Google Fonts into public/fonts/ and writes
-// src/styles/fonts.css. Run once, or again to refresh; the site never talks to
-// Google at runtime — that is the point of vendoring these files.
-import { mkdir, writeFile } from 'node:fs/promises';
+// Restore the reviewed, pinned font assets. Updating a font requires reviewing its
+// source and changing fonts-manifest.mjs; a remote stylesheet cannot change the
+// files, CSS, or checksums this script accepts. The site makes no runtime requests.
 import { createHash } from 'node:crypto';
+import { mkdir, mkdtemp, rename, rm, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { FONTS } from './fonts-manifest.mjs';
 
-const UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
+const MAX_FONT_BYTES = 128 * 1024;
+const DOWNLOAD_TIMEOUT_MS = 15_000;
+const ROOT = fileURLToPath(new URL('../', import.meta.url));
 
-// Only the weights the design uses, only latin + latin-ext. latin alone omits
-// U+0130 (İ) and would break the studio's own Turkish product names.
-const CSS_URL =
-  'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap';
-const WANTED_SUBSETS = new Set(['latin', 'latin-ext']);
-
-const SLUGS = { 'Space Grotesk': 'space-grotesk', 'JetBrains Mono': 'jetbrains-mono' };
-
-const css = await fetch(CSS_URL, { headers: { 'User-Agent': UA } }).then((r) => r.text());
-
-const faces = [...css.matchAll(/\/\* ([\w-]+) \*\/\s*(@font-face \{[^}]*\})/g)]
-  .map(([, subset, face]) => ({
-    subset,
-    family: /font-family: '([^']+)'/.exec(face)[1],
-    weight: Number(/font-weight: (\d+)/.exec(face)[1]),
-    url: /src: url\((\S+)\)/.exec(face)[1],
-    unicodeRange: /unicode-range: ([^;]+);/.exec(face)[1]
-  }))
-  .filter((f) => WANTED_SUBSETS.has(f.subset));
-
-// Google serves one variable file per family+subset covering the whole requested
-// weight range, so the three weights of each family are the same bytes. Ship it
-// once and declare the range, rather than three identical downloads.
-const groups = new Map();
-for (const f of faces) {
-  const key = `${f.family}|${f.subset}`;
-  const g = groups.get(key) ?? { ...f, weights: [] };
-  g.weights.push(f.weight);
-  groups.set(key, g);
+export function validateFontUrl(value) {
+  const url = new URL(value);
+  if (
+    url.protocol !== 'https:' ||
+    url.hostname !== 'fonts.gstatic.com' ||
+    url.port ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    !/^\/s\/[a-z]+\/v\d+\/[A-Za-z0-9_-]+\.woff2$/.test(url.pathname)
+  ) {
+    throw new Error(`Untrusted font URL: ${value}`);
+  }
+  return url.href;
 }
 
-await mkdir('public/fonts', { recursive: true });
-await mkdir('src/styles', { recursive: true });
+export async function downloadFont(font, { fetchImpl = globalThis.fetch } = {}) {
+  const url = validateFontUrl(font.url);
+  const response = await fetchImpl(url, {
+    redirect: 'error',
+    signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS)
+  });
+  if (!response.ok || response.redirected || (response.url && response.url !== url)) {
+    await response.body?.cancel();
+    throw new Error(`Font download failed: ${font.file} (HTTP ${response.status})`);
+  }
+  if (response.headers.get('content-type')?.split(';')[0].trim() !== 'font/woff2') {
+    await response.body?.cancel();
+    throw new Error(`Expected a WOFF2 response for ${font.file}`);
+  }
+  const declaredLength = response.headers.get('content-length');
+  if (declaredLength !== null && Number(declaredLength) > MAX_FONT_BYTES) {
+    await response.body?.cancel();
+    throw new Error(`Font download too large: ${font.file}`);
+  }
+  if (!response.body) throw new Error(`Empty font response: ${font.file}`);
 
-const rules = [];
-for (const g of groups.values()) {
-  const bytes = Buffer.from(await fetch(g.url).then((r) => r.arrayBuffer()));
-  const file = `${SLUGS[g.family]}-${g.subset}.woff2`;
-  await writeFile(`public/fonts/${file}`, bytes);
+  const reader = response.body.getReader();
+  const chunks = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_FONT_BYTES || size > font.bytes) {
+        throw new Error(`Font download too large: ${font.file}`);
+      }
+      chunks.push(value);
+    }
+  } catch (error) {
+    await reader.cancel().catch(() => {});
+    throw error;
+  } finally {
+    reader.releaseLock();
+  }
 
-  const min = Math.min(...g.weights);
-  const max = Math.max(...g.weights);
-  rules.push(
-    `@font-face {\n  font-family: '${g.family}';\n  font-style: normal;\n  font-weight: ${min} ${max};\n  font-display: swap;\n  src: url('/fonts/${file}') format('woff2');\n  unicode-range: ${g.unicodeRange};\n}`
-  );
-  console.log(
-    `${file}  ${bytes.byteLength} bytes  weights ${min}-${max}  sha256 ${createHash('sha256').update(bytes).digest('hex').slice(0, 12)}`
-  );
+  const bytes = Buffer.concat(chunks);
+  if (
+    bytes.length !== font.bytes ||
+    bytes.length < 48 ||
+    bytes.toString('ascii', 0, 4) !== 'wOF2'
+  ) {
+    throw new Error(`Invalid WOFF2 font: ${font.file}`);
+  }
+  if (createHash('sha256').update(bytes).digest('hex') !== font.sha256) {
+    throw new Error(`Font checksum mismatch: ${font.file}`);
+  }
+  return bytes;
 }
 
-await writeFile(
-  'src/styles/fonts.css',
-  `/* Generated by scripts/fetch-fonts.mjs — do not edit by hand. */\n\n${rules.join('\n\n')}\n`
-);
+export function renderFontCss() {
+  const rules = FONTS.map((font) => {
+    const comment = font.comment ? `/* ${font.comment} */\n` : '';
+    return `${comment}@font-face {\n  font-family: '${font.family}';\n  font-style: normal;\n  font-weight: ${font.weight};\n  font-display: swap;\n  src: url('/fonts/${font.file}') format('woff2');\n  unicode-range: ${font.unicodeRange};\n}`;
+  });
+  return `/* Generated by scripts/fetch-fonts.mjs — do not edit by hand. */\n\n${rules.join('\n\n')}\n`;
+}
+
+export async function vendorFonts({ root = ROOT, fetchImpl = globalThis.fetch } = {}) {
+  // All network and integrity checks finish before any output is touched. Keep
+  // the five small validated files in memory, then stage complete output files.
+  const downloads = [];
+  for (const font of FONTS) {
+    downloads.push({ font, bytes: await downloadFont(font, { fetchImpl }) });
+  }
+  const staging = await mkdtemp(join(root, '.font-download-'));
+  try {
+    for (const { font, bytes } of downloads) {
+      await writeFile(join(staging, font.file), bytes);
+    }
+    await writeFile(join(staging, 'fonts.css'), renderFontCss());
+    await mkdir(join(root, 'public/fonts'), { recursive: true });
+    await mkdir(join(root, 'src/styles'), { recursive: true });
+    for (const { font } of downloads) {
+      await rename(join(staging, font.file), join(root, 'public/fonts', font.file));
+    }
+    await rename(join(staging, 'fonts.css'), join(root, 'src/styles/fonts.css'));
+  } finally {
+    await rm(staging, { recursive: true, force: true });
+  }
+  for (const { font, bytes } of downloads) {
+    console.log(`${font.file}  ${bytes.length} bytes  sha256 ${font.sha256}`);
+  }
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await vendorFonts();
+}

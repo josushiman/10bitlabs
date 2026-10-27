@@ -4,10 +4,10 @@
 // 'unsafe-inline', so the hash has to be computed from the bytes that actually
 // shipped. Hashing the built HTML rather than the source means a stray edit to
 // the script cannot silently break the page — the hash simply follows it.
-import { createHash } from 'node:crypto';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import astroConfig from '../astro.config.mjs';
+import { inlineScriptHash } from './inline-script-hash.mjs';
 
 const DIST = 'dist';
 // One source for the canonical hostname: if the site moves, the header rule that
@@ -28,25 +28,7 @@ async function htmlFiles(dir) {
 const hashes = new Set();
 for (const file of await htmlFiles(DIST)) {
   const html = await readFile(file, 'utf8');
-  let executableInlineScriptCount = 0;
-  for (const [, attrs, body] of html.matchAll(/<script([^>]*)>([\s\S]*?)<\/script>/g)) {
-    if (/\ssrc=/.test(attrs)) continue;
-    // JSON-LD is structured data, not executable JavaScript. It must remain
-    // outside script-src so adding a fact to it cannot silently widen the CSP.
-    if (/\stype=(?:"application\/ld\+json"|'application\/ld\+json'|application\/ld\+json)(?:\s|$)/i.test(attrs)) {
-      continue;
-    }
-    executableInlineScriptCount++;
-    hashes.add(`'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`);
-  }
-  if (executableInlineScriptCount === 0) {
-    throw new Error(`No executable inline script found in ${file} — the theme script should be there.`);
-  }
-  if (executableInlineScriptCount !== 1) {
-    throw new Error(
-      `Expected exactly one executable inline script in ${file}, found ${executableInlineScriptCount}. The theme script is meant to be the only one.`
-    );
-  }
+  hashes.add(inlineScriptHash(html, file));
 }
 
 if (hashes.size !== 1) {
