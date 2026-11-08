@@ -15,7 +15,7 @@
     "@astrojs/check": "^0.9.10",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
-    "astro": "^7.4.2",
+    "astro": "^7.4.5",
     "parse5": "^8.0.1",
     "typescript": "^5.9.3",
     "wrangler": "^4.153.0"
