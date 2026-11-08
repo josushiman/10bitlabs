@@ -16,7 +16,7 @@
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
     "astro": "^7.4.2",
-    "parse5": "^8.0.1",
+    "parse5": "^8.1.0",
     "typescript": "^5.9.3",
     "wrangler": "^4.153.0"
   },
